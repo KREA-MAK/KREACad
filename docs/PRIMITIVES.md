@@ -35,12 +35,14 @@ z(u) = b * sin(q * u)
 
 The trefoil can be customized with the following parameters:
 
-- **a**: Major radius (default: 2.0) - Controls the overall size of the knot
-- **b**: Minor radius (default: 0.6) - Controls the amplitude of the twist
+- **a**: Major radius (default: 1.0) - Controls the overall size of the knot
+- **b**: Minor radius (default: 0.4) - Controls the amplitude of the twist
 - **q**: Twist count (default: 3) - Number of twists in the knot (3 creates a trefoil)
 - **tube**: Tube radius (default: 0.25) - Thickness of the tube
 - **segU**: U segments (default: 180) - Resolution along the curve
 - **segV**: V segments (default: 24) - Resolution around the tube
+
+Note: The UI parameter panel uses different default values (a=2.0, b=0.6) to create a more visually appealing initial trefoil.
 
 ### Usage
 
@@ -54,9 +56,13 @@ There are two ways to create a trefoil knot:
 
 ### Examples
 
-- **Classic Trefoil** (p=2, q=3): a=2.0, b=0.6, q=3
-- **Figure-8 Knot** (p=2, q=4): a=2.0, b=0.6, q=4
-- **Torus Knot** (p=2, q=5): a=2.0, b=0.6, q=5
+Different values of the **q** parameter create different knot types:
+
+- **Classic Trefoil** (q=3): a=2.0, b=0.6, q=3
+- **Cinquefoil Knot** (q=5): a=2.0, b=0.6, q=5
+- **Septfoil Knot** (q=7): a=2.0, b=0.6, q=7
+
+You can also experiment with different a and b values to create various torus knot variations.
 
 ## Technical Details
 
