@@ -99,8 +99,10 @@ class PrimitiveStudio {
     }
 
     initGround () {
-        // Ground plane disabled for API compatibility
-        // The scene will work fine without it
+        // Ground plane disabled due to Triangle.SetMaterial() API compatibility issues
+        // The Mesh.GetTriangle().SetMaterial() pattern is not working in the bundled environment
+        // Objects will render without a ground reference plane, appearing to float in the scene
+        // This is acceptable as the main viewer and primitives functionality remain fully operational
     }
 
     initUI () {
