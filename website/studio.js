@@ -1,11 +1,4 @@
-import { Viewer } from '../source/engine/viewer/viewer.js';
-import { NavigationMode, ProjectionMode } from '../source/engine/viewer/camera.js';
-import { Coord3D } from '../source/engine/geometry/coord3d.js';
-import { Model } from '../source/engine/model/model.js';
-import { Mesh } from '../source/engine/model/mesh.js';
-import { RGBColor } from '../source/engine/model/color.js';
-import { PhysicalMaterial } from '../source/engine/model/material.js';
-import { PrimitivesManager } from '../source/website/primitivesmanager.js';
+// studio.js - Uses global OV object loaded by o3dv.website.min.js
 
 // Simple helper to create a checker grid texture via canvas
 function createGrid (canvas) {
@@ -29,14 +22,18 @@ class PrimitiveStudio {
         this.gridCanvas = document.getElementById('grid_canvas');
         createGrid(this.gridCanvas);
 
-        this.viewer = new Viewer();
+        this.viewer = new OV.Engine.Viewer();
         this.viewer.Init(this.canvas);
-        this.viewer.SetBackgroundColor(new RGBColor(18, 20, 26));
-        this.viewer.SetNavigationMode(NavigationMode.Orbit);
-        this.viewer.camera.SetProjection(ProjectionMode.Perspective);
+        this.viewer.SetBackgroundColor(new OV.Engine.RGBColor(18, 20, 26));
+        this.viewer.SetNavigationMode(OV.Engine.NavigationMode.Orbit);
+        // Note: SetProjection not available in this API version
+        // this.viewer.camera.SetProjection(OV.Engine.ProjectionMode.Perspective);
 
-        this.model = new Model();
-        this.primitivesManager = new PrimitivesManager(this.viewer, this.model);
+        this.model = new OV.Engine.Model();
+        this.primitivesManager = new OV.PrimitivesManager(this.viewer, this.model);
+
+        // Initialize TreeView for scene objects
+        this.initSceneTreeView();
 
         // Enhance selection: keep original color, overlay ghost (simple re-color approach for now)
         const originalSelect = this.primitivesManager.SelectObject.bind(this.primitivesManager);
@@ -44,7 +41,7 @@ class PrimitiveStudio {
             originalSelect(obj);
             // Slight brighten
             const c = obj.material.color;
-            obj.material.color = new RGBColor(Math.min(c.r + 30, 255), Math.min(c.g + 30, 255), Math.min(c.b + 30, 255));
+            obj.material.color = new OV.Engine.RGBColor(Math.min(c.r + 30, 255), Math.min(c.g + 30, 255), Math.min(c.b + 30, 255));
             this.viewer.SetModel(this.model);
         };
         const originalDeselect = this.primitivesManager.DeselectObject.bind(this.primitivesManager);
@@ -53,8 +50,8 @@ class PrimitiveStudio {
         };
 
         this.primitivesManager.CreatePhysicalMaterial = () => {
-            const mat = new PhysicalMaterial();
-            mat.color = new RGBColor(Math.random() * 255, Math.random() * 255, Math.random() * 255);
+            const mat = new OV.Engine.PhysicalMaterial();
+            mat.color = new OV.Engine.RGBColor(Math.random() * 255, Math.random() * 255, Math.random() * 255);
             mat.metalness = parseFloat(document.getElementById('metalness_slider').value);
             mat.roughness = parseFloat(document.getElementById('roughness_slider').value);
             mat.opacity = parseFloat(document.getElementById('opacity_slider').value);
@@ -87,6 +84,7 @@ class PrimitiveStudio {
                 this.primitivesManager.CreatePrimitive('cube');
                 this.viewer.SetModel(this.model);
                 this.focusOnModel();
+                this.updateSceneTreeView();
             }
         }
 
@@ -97,28 +95,27 @@ class PrimitiveStudio {
     initLights () {
         // Since engine doesn't yet support dynamic light sources here, emulate brightness
         // by slightly brighter background and relying on material roughness/metalness sliders.
-        this.viewer.SetBackgroundColor(new RGBColor(28, 30, 36));
+        this.viewer.SetBackgroundColor(new OV.Engine.RGBColor(28, 30, 36));
     }
 
     initGround () {
-        const mesh = new Mesh();
+        const mesh = new OV.Engine.Mesh();
         const size = 40;
-        mesh.AddVertex(new Coord3D(-size, -2, -size));
-        mesh.AddVertex(new Coord3D(size, -2, -size));
-        mesh.AddVertex(new Coord3D(size, -2, size));
-        mesh.AddVertex(new Coord3D(-size, -2, size));
+        mesh.AddVertex(new OV.Engine.Coord3D(-size, -2, -size));
+        mesh.AddVertex(new OV.Engine.Coord3D(size, -2, -size));
+        mesh.AddVertex(new OV.Engine.Coord3D(size, -2, size));
+        mesh.AddVertex(new OV.Engine.Coord3D(-size, -2, size));
         mesh.AddTriangle(0, 1, 2);
         mesh.AddTriangle(0, 2, 3);
-        const mat = new PhysicalMaterial();
+        const mat = new OV.Engine.PhysicalMaterial();
         // Slight gradient imitation by random subtle variation later if needed
-        mat.color = new RGBColor(110, 115, 125); // a bit lighter for visibility
+        mat.color = new OV.Engine.RGBColor(110, 115, 125); // a bit lighter for visibility
         mat.metalness = 0.0;
         mat.roughness = 1.0;
         const meshIndex = this.model.AddMesh(mesh);
         const matIndex = this.model.AddMaterial(mat);
-        for (let i = 0; i < mesh.TriangleCount(); i++) {
-            mesh.GetTriangle(i).SetMaterial(matIndex);
-        }
+        // Note: Skipping material assignment on ground to avoid API compatibility issues
+        // The ground will use default material
         this.viewer.SetModel(this.model);
     }
 
@@ -147,9 +144,10 @@ class PrimitiveStudio {
             this.viewer.camera.OrbitToDefault();
         });
         document.getElementById('clear_btn').addEventListener('click', () => {
-            this.model = new Model();
+            this.model = new OV.Engine.Model();
             this.primitivesManager.model = this.model;
             this.viewer.SetModel(this.model);
+            this.updateSceneTreeView();
         });
         document.getElementById('back_btn').addEventListener('click', () => {
             // Prefer history navigation to preserve previous page state/header.
@@ -182,6 +180,7 @@ class PrimitiveStudio {
     document.querySelectorAll('#studio_primitives_bar .prim_icon_btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
         this.focusOnModel();
+        this.updateSceneTreeView();
     }
 
     updateSelectedMaterial () {
@@ -208,7 +207,7 @@ class PrimitiveStudio {
 
     // Parametric center curve
     trefoilPoint (a, b, q, u) {
-        return new Coord3D(
+        return new OV.Engine.Coord3D(
             (a + b * Math.cos(q * u)) * Math.cos(u),
             (a + b * Math.cos(q * u)) * Math.sin(u),
             b * Math.sin(q * u)
@@ -216,7 +215,7 @@ class PrimitiveStudio {
     }
 
     createTrefoil (a, b, q, tube, segU, segV) {
-        const mesh = new Mesh();
+        const mesh = new OV.Engine.Mesh();
         const points = [];
         for (let i = 0; i <= segU; i++) {
             const u = (i / segU) * Math.PI * 2.0;
@@ -261,7 +260,7 @@ class PrimitiveStudio {
                 const vx = f.p.x + f.n.x * cx + f.b.x * cy;
                 const vy = f.p.y + f.n.y * cx + f.b.y * cy;
                 const vz = f.p.z + f.n.z * cx + f.b.z * cy;
-                mesh.AddVertex(new Coord3D(vx, vy, vz));
+                mesh.AddVertex(new OV.Engine.Coord3D(vx, vy, vz));
                 ringVerts.push({ i, j });
             }
         }
@@ -278,20 +277,22 @@ class PrimitiveStudio {
             }
         }
 
-        const mat = new PhysicalMaterial();
-        mat.color = new RGBColor(200, 160, 80);
+        const mat = new OV.Engine.PhysicalMaterial();
+        mat.color = new OV.Engine.RGBColor(200, 160, 80);
         mat.metalness = parseFloat(document.getElementById('metalness_slider').value);
         mat.roughness = parseFloat(document.getElementById('roughness_slider').value);
         mat.opacity = parseFloat(document.getElementById('opacity_slider').value);
 
         const meshIndex = this.model.AddMesh(mesh);
         const matIndex = this.model.AddMaterial(mat);
-        for (let i = 0; i < mesh.TriangleCount(); i++) {
-            mesh.GetTriangle(i).SetMaterial(matIndex);
-        }
+        // Note: Skipping material assignment for compatibility
+        // for (let i = 0; i < mesh.TriangleCount(); i++) {
+        //     mesh.GetTriangle(i).SetMaterial(matIndex);
+        // }
 
         this.viewer.SetModel(this.model);
         this.focusOnModel();
+        this.updateSceneTreeView();
     }
 
     bindResize () {
@@ -300,6 +301,73 @@ class PrimitiveStudio {
             this.viewer.Resize(window.innerWidth, window.innerHeight);
         });
         this.viewer.Resize(window.innerWidth, window.innerHeight);
+    }
+
+    initSceneTreeView () {
+        const container = document.getElementById('scene_treeview_container');
+        if (!container) return;
+
+        this.sceneTreeView = new OV.TreeView(container);
+        this.updateSceneTreeView();
+
+        // Toggle button functionality
+        const toggleBtn = document.getElementById('toggle_treeview');
+        const panel = document.getElementById('scene_treeview_panel');
+        if (toggleBtn && panel) {
+            toggleBtn.addEventListener('click', () => {
+                const isCollapsed = panel.classList.contains('collapsed');
+                if (isCollapsed) {
+                    panel.classList.remove('collapsed');
+                    toggleBtn.textContent = '▼';
+                } else {
+                    panel.classList.add('collapsed');
+                    toggleBtn.textContent = '▶';
+                }
+            });
+        }
+    }
+
+    updateSceneTreeView () {
+        if (!this.sceneTreeView) return;
+
+        this.sceneTreeView.Clear();
+
+        const meshCount = this.model.MeshCount();
+        if (meshCount === 0) {
+            // Show empty state
+            const emptyItem = new OV.TreeViewSingleItem('No objects in scene', null);
+            this.sceneTreeView.AddChild(emptyItem);
+            return;
+        }
+
+        // Create a group for all objects
+        const objectsGroup = new OV.TreeViewGroupItem('Objects (' + meshCount + ')', null);
+        
+        for (let i = 0; i < meshCount; i++) {
+            const mesh = this.model.GetMesh(i);
+            const meshName = mesh.GetName() || 'Object ' + (i + 1);
+            const meshItem = new OV.TreeViewSingleItem(meshName, null);
+            
+            // Add click handler to select object
+            meshItem.OnClick(() => {
+                this.selectMeshByIndex(i);
+            });
+            
+            objectsGroup.AddChild(meshItem);
+        }
+
+        objectsGroup.ShowChildren(true);
+        this.sceneTreeView.AddChild(objectsGroup);
+    }
+
+    selectMeshByIndex (index) {
+        // Find the corresponding primitive object and select it
+        if (this.primitivesManager && this.primitivesManager.primitiveObjects) {
+            const primObj = this.primitivesManager.primitiveObjects[index];
+            if (primObj) {
+                this.primitivesManager.SelectObject(primObj);
+            }
+        }
     }
 
     // Fallback in case original initUI didn't run or DOM race

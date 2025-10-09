@@ -54,6 +54,144 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
 #generate_trefoil { margin-top:8px; width:100%; background:#2a5770; border:1px solid #34769a; padding:9px 12px; color:#fff; font-weight:600; border-radius:8px; cursor:pointer; }
 #generate_trefoil:hover { background:#327193; }
 .small_hint { font-size:10px; opacity:.5; margin-top:4px; }
+
+/* Scene TreeView Panel - Glowing Transparent Menu */
+#scene_treeview_panel {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    max-height: 400px;
+    background: rgba(20, 24, 30, 0.75);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(51, 147, 189, 0.4);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 0 30px rgba(51, 147, 189, 0.3),
+                0 10px 28px -6px rgba(0, 0, 0, 0.55),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    z-index: 15;
+    animation: glow-pulse 3s ease-in-out infinite;
+    transition: all 0.3s ease;
+}
+
+#scene_treeview_panel:hover {
+    box-shadow: 0 0 40px rgba(51, 147, 189, 0.5),
+                0 10px 28px -6px rgba(0, 0, 0, 0.65),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: rgba(51, 147, 189, 0.6);
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(51, 147, 189, 0.3),
+                    0 10px 28px -6px rgba(0, 0, 0, 0.55),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 45px rgba(51, 147, 189, 0.5),
+                    0 10px 28px -6px rgba(0, 0, 0, 0.55),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+}
+
+#scene_treeview_panel .panel_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(51, 147, 189, 0.3);
+}
+
+#scene_treeview_panel .panel_header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(51, 147, 189, 0.5);
+}
+
+#scene_treeview_panel .toggle_btn {
+    background: rgba(51, 147, 189, 0.2);
+    border: 1px solid rgba(51, 147, 189, 0.4);
+    color: #3393bd;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s;
+}
+
+#scene_treeview_panel .toggle_btn:hover {
+    background: rgba(51, 147, 189, 0.3);
+    box-shadow: 0 0 10px rgba(51, 147, 189, 0.4);
+}
+
+#scene_treeview_container {
+    max-height: 350px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+}
+
+#scene_treeview_container::-webkit-scrollbar {
+    width: 6px;
+}
+
+#scene_treeview_container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+#scene_treeview_container::-webkit-scrollbar-thumb {
+    background: rgba(51, 147, 189, 0.4);
+    border-radius: 3px;
+}
+
+#scene_treeview_container::-webkit-scrollbar-thumb:hover {
+    background: rgba(51, 147, 189, 0.6);
+}
+
+/* Enhance treeview styles for the glowing menu */
+#scene_treeview_panel .ov_tree_view {
+    font-size: 13px;
+}
+
+#scene_treeview_panel .ov_tree_view div.ov_tree_item {
+    padding: 6px 8px;
+    margin: 2px 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+#scene_treeview_panel .ov_tree_view div.ov_tree_item.clickable:hover {
+    background: rgba(51, 147, 189, 0.2);
+    border-color: rgba(51, 147, 189, 0.3);
+    box-shadow: 0 0 15px rgba(51, 147, 189, 0.2);
+}
+
+#scene_treeview_panel .ov_tree_view div.ov_tree_item.selected {
+    background: rgba(51, 147, 189, 0.3);
+    border-color: rgba(51, 147, 189, 0.5);
+    box-shadow: 0 0 20px rgba(51, 147, 189, 0.4);
+    font-weight: 600;
+}
+
+#scene_treeview_panel .ov_tree_view div.ov_tree_item_name {
+    color: #d4dde7;
+}
+
+#scene_treeview_panel.collapsed #scene_treeview_container {
+    display: none;
+}
+
+#scene_treeview_panel.collapsed {
+    max-height: 50px;
+}
 </style>
 </head>
 <body>
@@ -96,6 +234,15 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
             </button>
         </div>
     </div>
+    <!-- Scene TreeView Panel - Glowing Transparent Menu -->
+    <div id="scene_treeview_panel">
+        <div class="panel_header">
+            <h3>Scene Objects</h3>
+            <button id="toggle_treeview" class="toggle_btn" title="Toggle Scene View">▼</button>
+        </div>
+        <div id="scene_treeview_container"></div>
+    </div>
+
     <div id="param_panel">
         <h2>KreaCAD Primitive Studio</h2>
         <div class="control">
@@ -159,6 +306,6 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
         </div>
 
 <script src="o3dv.website.min.js"></script>
-<script type="module" src="./studio.js"></script>
+<script src="./studio.js"></script>
 </body>
 </html>

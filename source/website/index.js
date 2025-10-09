@@ -6,6 +6,7 @@ import { PluginType, RegisterPlugin } from './pluginregistry.js';
 import { ButtonDialog, ProgressDialog } from './dialog.js';
 import { ShowMessageDialog } from './dialogs.js';
 import { PrimitivesManager } from './primitivesmanager.js';
+import { TreeView, TreeViewSingleItem, TreeViewGroupItem } from './treeview.js';
 
 import * as Engine from '../engine/main.js';
 export { Engine };
@@ -88,3 +89,4 @@ export function StartEmbed ()
 }
 
 export { PrimitivesManager };
+export { TreeView, TreeViewSingleItem, TreeViewGroupItem };
