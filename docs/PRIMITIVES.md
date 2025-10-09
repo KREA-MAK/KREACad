@@ -56,13 +56,13 @@ There are two ways to create a trefoil knot:
 
 ### Examples
 
-Different values of the **q** parameter create different knot types:
+Different values of the **q** parameter create different torus knot types:
 
-- **Classic Trefoil** (q=3): a=2.0, b=0.6, q=3
-- **Cinquefoil Knot** (q=5): a=2.0, b=0.6, q=5
-- **Septfoil Knot** (q=7): a=2.0, b=0.6, q=7
+- **Trefoil Knot** (q=3): a=2.0, b=0.6, q=3 - Creates a (2,3) torus knot
+- **(2,5) Torus Knot** (q=5): a=2.0, b=0.6, q=5
+- **(2,7) Torus Knot** (q=7): a=2.0, b=0.6, q=7
 
-You can also experiment with different a and b values to create various torus knot variations.
+You can also experiment with different a and b values to create various torus knot variations. Note that the implementation creates (2,q) torus knots where q is the twist parameter.
 
 ## Technical Details
 
