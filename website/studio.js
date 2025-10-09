@@ -99,24 +99,8 @@ class PrimitiveStudio {
     }
 
     initGround () {
-        const mesh = new OV.Engine.Mesh();
-        const size = 40;
-        mesh.AddVertex(new OV.Engine.Coord3D(-size, -2, -size));
-        mesh.AddVertex(new OV.Engine.Coord3D(size, -2, -size));
-        mesh.AddVertex(new OV.Engine.Coord3D(size, -2, size));
-        mesh.AddVertex(new OV.Engine.Coord3D(-size, -2, size));
-        mesh.AddTriangle(0, 1, 2);
-        mesh.AddTriangle(0, 2, 3);
-        const mat = new OV.Engine.PhysicalMaterial();
-        // Slight gradient imitation by random subtle variation later if needed
-        mat.color = new OV.Engine.RGBColor(110, 115, 125); // a bit lighter for visibility
-        mat.metalness = 0.0;
-        mat.roughness = 1.0;
-        const meshIndex = this.model.AddMesh(mesh);
-        const matIndex = this.model.AddMaterial(mat);
-        // Note: Skipping material assignment on ground to avoid API compatibility issues
-        // The ground will use default material
-        this.viewer.SetModel(this.model);
+        // Ground plane disabled for API compatibility
+        // The scene will work fine without it
     }
 
     initUI () {
