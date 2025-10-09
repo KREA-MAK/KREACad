@@ -1,4 +1,5 @@
 import { Mesh } from '../engine/model/mesh.js';
+import { Triangle } from '../engine/model/triangle.js';
 import { PhongMaterial } from '../engine/model/material.js';
 import { RGBColor } from '../engine/model/color.js';
 import { Coord3D } from '../engine/geometry/coord3d.js';
@@ -228,8 +229,8 @@ export class PrimitivesManager
                 const first = i * (segments + 1) + j;
                 const second = first + segments + 1;
 
-                mesh.AddTriangle(first, second, first + 1);
-                mesh.AddTriangle(second, second + 1, first + 1);
+                mesh.AddTriangle(new Triangle(first, second, first + 1));
+                mesh.AddTriangle(new Triangle(second, second + 1, first + 1));
             }
         }
 
@@ -257,12 +258,12 @@ export class PrimitivesManager
             const next = (i + 1) % segments;
 
             // Top face
-            mesh.AddTriangle(0, 2 + i * 2, 2 + next * 2);
+            mesh.AddTriangle(new Triangle(0, 2 + i * 2, 2 + next * 2));
             // Bottom face
-            mesh.AddTriangle(1, 3 + next * 2, 3 + i * 2);
+            mesh.AddTriangle(new Triangle(1, 3 + next * 2, 3 + i * 2));
             // Side faces
-            mesh.AddTriangle(2 + i * 2, 3 + i * 2, 2 + next * 2);
-            mesh.AddTriangle(3 + i * 2, 3 + next * 2, 2 + next * 2);
+            mesh.AddTriangle(new Triangle(2 + i * 2, 3 + i * 2, 2 + next * 2));
+            mesh.AddTriangle(new Triangle(3 + i * 2, 3 + next * 2, 2 + next * 2));
         }
 
         return mesh;
@@ -287,9 +288,9 @@ export class PrimitivesManager
             const next = (i + 1) % segments;
 
             // Base face
-            mesh.AddTriangle(1, 2 + next, 2 + i);
+            mesh.AddTriangle(new Triangle(1, 2 + next, 2 + i));
             // Side face
-            mesh.AddTriangle(0, 2 + i, 2 + next);
+            mesh.AddTriangle(new Triangle(0, 2 + i, 2 + next));
         }
 
         return mesh;
@@ -303,8 +304,8 @@ export class PrimitivesManager
         mesh.AddVertex(new Coord3D(half, 0, half));
         mesh.AddVertex(new Coord3D(-half, 0, half));
 
-        mesh.AddTriangle(0, 1, 2);
-        mesh.AddTriangle(0, 2, 3);
+        mesh.AddTriangle(new Triangle(0, 1, 2));
+        mesh.AddTriangle(new Triangle(0, 2, 3));
 
         return mesh;
     }
@@ -334,8 +335,8 @@ export class PrimitivesManager
                 const v3 = next_i * minorSegments + next_j;
                 const v4 = i * minorSegments + next_j;
 
-                mesh.AddTriangle(v1, v2, v3);
-                mesh.AddTriangle(v1, v3, v4);
+                mesh.AddTriangle(new Triangle(v1, v2, v3));
+                mesh.AddTriangle(new Triangle(v1, v3, v4));
             }
         }
 
@@ -363,7 +364,7 @@ export class PrimitivesManager
         ];
 
         faces.forEach(f => {
-            mesh.AddTriangle(f[0], f[1], f[2]);
+            mesh.AddTriangle(new Triangle(f[0], f[1], f[2]));
         });
 
         return mesh;
@@ -386,7 +387,7 @@ export class PrimitivesManager
         ];
 
         faces.forEach(f => {
-            mesh.AddTriangle(f[0], f[1], f[2]);
+            mesh.AddTriangle(new Triangle(f[0], f[1], f[2]));
         });
 
         return mesh;
@@ -453,8 +454,8 @@ export class PrimitivesManager
                 const a1 = (i + 1) * ringSize + j;
                 const a2 = (i + 1) * ringSize + (j + 1);
                 const a3 = i * ringSize + (j + 1);
-                mesh.AddTriangle(a0, a1, a2);
-                mesh.AddTriangle(a0, a2, a3);
+                mesh.AddTriangle(new Triangle(a0, a1, a2));
+                mesh.AddTriangle(new Triangle(a0, a2, a3));
             }
         }
 

@@ -3,6 +3,7 @@ import { NavigationMode, ProjectionMode } from '../source/engine/viewer/camera.j
 import { Coord3D } from '../source/engine/geometry/coord3d.js';
 import { Model } from '../source/engine/model/model.js';
 import { Mesh } from '../source/engine/model/mesh.js';
+import { Triangle } from '../source/engine/model/triangle.js';
 import { RGBColor } from '../source/engine/model/color.js';
 import { PhysicalMaterial } from '../source/engine/model/material.js';
 import { PrimitivesManager } from '../source/website/primitivesmanager.js';
@@ -107,8 +108,8 @@ class PrimitiveStudio {
         mesh.AddVertex(new Coord3D(size, -2, -size));
         mesh.AddVertex(new Coord3D(size, -2, size));
         mesh.AddVertex(new Coord3D(-size, -2, size));
-        mesh.AddTriangle(0, 1, 2);
-        mesh.AddTriangle(0, 2, 3);
+        mesh.AddTriangle(new Triangle(0, 1, 2));
+        mesh.AddTriangle(new Triangle(0, 2, 3));
         const mat = new PhysicalMaterial();
         // Slight gradient imitation by random subtle variation later if needed
         mat.color = new RGBColor(110, 115, 125); // a bit lighter for visibility
@@ -273,8 +274,8 @@ class PrimitiveStudio {
                 const a1 = (i + 1) * ringSize + j;
                 const a2 = (i + 1) * ringSize + (j + 1);
                 const a3 = i * ringSize + (j + 1);
-                mesh.AddTriangle(a0, a1, a2);
-                mesh.AddTriangle(a0, a2, a3);
+                mesh.AddTriangle(new Triangle(a0, a1, a2));
+                mesh.AddTriangle(new Triangle(a0, a2, a3));
             }
         }
 
