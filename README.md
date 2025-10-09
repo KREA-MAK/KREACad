@@ -17,6 +17,12 @@ https://krea.fabus.app
 * **Import**: 3dm, 3ds, 3mf, amf, bim, brep, dae, fbx, fcstd, gltf, ifc, iges, step, stl, obj, off, ply, wrl.
 * **Export**: 3dm, bim, gltf, obj, off, stl, ply.
 
+## Features
+
+* **Primitive Studio**: Create basic 3D shapes and advanced parametric surfaces like trefoil knots. See [Primitives Documentation](docs/PRIMITIVES.md) for details.
+* **Material Editor**: Adjust metalness, roughness, and opacity of objects
+* **Advanced CAD Support**: Import and visualize complex CAD models from various formats
+
 ## External Libraries
 
 KreaCAD uses these wonderful libraries: [three.js](https://github.com/mrdoob/three.js), [pickr](https://github.com/Simonwep/pickr), [fflate](https://github.com/101arrowz/fflate), [draco](https://github.com/google/draco), [rhino3dm](https://github.com/mcneel/rhino3dm), [web-ifc](https://github.com/tomvandig/web-ifc), [occt-import-js](https://github.com/kovacsv/occt-import-js).
