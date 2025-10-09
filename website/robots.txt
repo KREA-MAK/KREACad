@@ -23,6 +23,7 @@ Disallow: /*.min.css$
 # Allow specific file formats that showcase CAD capabilities
 Allow: /*.step$
 Allow: /*.stp$
+Allow: /*.stpz$
 Allow: /*.iges$
 Allow: /*.igs$
 Allow: /*.3dm$
@@ -30,6 +31,22 @@ Allow: /*.obj$
 Allow: /*.stl$
 Allow: /*.gltf$
 Allow: /*.glb$
+Allow: /*.dxf$
+Allow: /*.svg$
+Allow: /*.usdz$
+Allow: /*.xyz$
+Allow: /*.ply$
+Allow: /*.off$
+Allow: /*.fbx$
+Allow: /*.dae$
+Allow: /*.wrl$
+Allow: /*.3mf$
+Allow: /*.amf$
+Allow: /*.3ds$
+Allow: /*.fcstd$
+Allow: /*.ifc$
+Allow: /*.bim$
+Allow: /*.brep$
 
 # Special rules for major search engines
 User-agent: Googlebot

@@ -14,6 +14,11 @@ import { ImporterStl } from './importerstl.js';
 import { ImporterBim } from './importerbim.js';
 import { ImporterThreeAmf, ImporterThree3mf, ImporterThreeDae, ImporterThreeFbx, ImporterThreeWrl } from './importerthree.js';
 import { ImporterFcstd } from './importerfcstd.js';
+import { ImporterThreeSvg } from './importersvg.js';
+import { ImporterThreeUsd } from './importerusd.js';
+import { ImporterDxf } from './importerdxf.js';
+import { ImporterStpz } from './importerstpz.js';
+import { ImporterXyz } from './importerxyz.js';
 
 import * as fflate from 'fflate';
 
@@ -96,7 +101,12 @@ export class Importer
             new ImporterThreeDae (),
             new ImporterThreeWrl (),
             new ImporterThree3mf (),
-            new ImporterThreeAmf ()
+            new ImporterThreeAmf (),
+            new ImporterThreeSvg (),
+            new ImporterThreeUsd (),
+            new ImporterDxf (),
+            new ImporterStpz (),
+            new ImporterXyz ()
         ];
         this.fileList = new ImporterFileList ();
         this.model = null;

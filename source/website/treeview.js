@@ -218,6 +218,7 @@ export class TreeView
     {
         this.mainDiv = AddDiv (parentDiv, 'ov_tree_view');
         this.children = [];
+        this.primitiveNodes = []; // Track primitive nodes
     }
 
     AddClass (className)
@@ -231,9 +232,92 @@ export class TreeView
         this.children.push (child);
     }
 
+    AddPrimitive (primitiveData)
+    {
+        // Create a tree item for the primitive
+        const icon = this.GetPrimitiveIcon (primitiveData.type);
+        const primitiveItem = new TreeViewItem (primitiveData.name, icon);
+
+        // Add click handler for selection
+        primitiveItem.OnClick (() => {
+            this.OnPrimitiveSelected (primitiveData);
+        });
+
+        // Add visibility toggle button
+        const visibilityButton = new TreeViewButton ('assets/icons/visible.svg');
+        visibilityButton.OnClick (() => {
+            this.TogglePrimitiveVisibility (primitiveData);
+        });
+
+        const groupItem = new TreeViewGroupButtonItem (primitiveData.name, icon);
+        groupItem.AppendButton (visibilityButton);
+        groupItem.OnClick (() => {
+            this.OnPrimitiveSelected (primitiveData);
+        });
+
+        this.AddChild (groupItem);
+        this.primitiveNodes.push ({
+            item: groupItem,
+            data: primitiveData,
+            visible: true
+        });
+
+        return groupItem;
+    }
+
+    GetPrimitiveIcon (type)
+    {
+        const iconMap = {
+            'cube': 'assets/icons/cube.svg',
+            'sphere': 'assets/icons/sphere.svg',
+            'cylinder': 'assets/icons/cylinder.svg',
+            'cone': 'assets/icons/cone.svg',
+            'torus': 'assets/icons/torus.svg',
+            'plane': 'assets/icons/plane.svg',
+            'icosahedron': 'assets/icons/icosahedron.svg',
+            'octahedron': 'assets/icons/octahedron.svg',
+            'trefoil': 'assets/icons/trefoil.svg'
+        };
+        return iconMap[type] || 'assets/icons/cube.svg';
+    }
+
+    OnPrimitiveSelected (primitiveData)
+    {
+        // Emit event for primitive selection
+        const event = new CustomEvent ('primitiveSelected', {
+            detail: primitiveData
+        });
+        this.mainDiv.dispatchEvent (event);
+    }
+
+    TogglePrimitiveVisibility (primitiveData)
+    {
+        const node = this.primitiveNodes.find (n => n.data === primitiveData);
+        if (node) {
+            node.visible = !node.visible;
+
+            // Update button icon
+            const button = node.item.buttonsDiv.querySelector ('.ov_tree_item_button');
+            if (button) {
+                const newIcon = node.visible ? 'assets/icons/visible.svg' : 'assets/icons/hidden.svg';
+                button.setAttribute ('src', newIcon);
+            }
+
+            // Emit visibility change event
+            const event = new CustomEvent ('primitiveVisibilityChanged', {
+                detail: {
+                    primitive: primitiveData,
+                    visible: node.visible
+                }
+            });
+            this.mainDiv.dispatchEvent (event);
+        }
+    }
+
     Clear ()
     {
         ClearDomElement (this.mainDiv);
         this.children = [];
+        this.primitiveNodes = [];
     }
 }

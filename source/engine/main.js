@@ -39,6 +39,10 @@ import { ImporterOff } from './import/importeroff.js';
 import { ImporterPly } from './import/importerply.js';
 import { ImporterStl } from './import/importerstl.js';
 import { ImporterThreeSvg } from './import/importersvg.js';
+import { ImporterThreeUsd } from './import/importerusd.js';
+import { ImporterDxf } from './import/importerdxf.js';
+import { ImporterStpz } from './import/importerstpz.js';
+import { ImporterXyz } from './import/importerxyz.js';
 import { ImporterThreeBase, ImporterThreeFbx, ImporterThreeDae, ImporterThreeWrl, ImporterThree3mf, ImporterThreeAmf } from './import/importerthree.js';
 import { ColorToMaterialConverter, NameFromLine, ParametersFromLine, ReadLines, IsPowerOfTwo, NextPowerOfTwo, UpdateMaterialTransparency, CreateOcctWorker, LoadExternalLibrary } from './import/importerutils.js';
 import { BinaryReader } from './io/binaryreader.js';
@@ -188,6 +192,10 @@ export {
     ImporterThreeWrl,
     ImporterThree3mf,
     ImporterThreeAmf,
+    ImporterThreeUsd,
+    ImporterDxf,
+    ImporterStpz,
+    ImporterXyz,
     ColorToMaterialConverter,
     NameFromLine,
     ParametersFromLine,

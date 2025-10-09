@@ -12,17 +12,18 @@ export class PrimitivesManager
         this.model = model;
         this.primitiveObjects = [];
         this.selectedObject = null;
+        this.selectedObjects = []; // Multiple selection support
         this.isEnabled = false;
         this.transformInfo = null;
+        this.treeViewManager = null; // Will be set by website.js
+        this.sceneInitialized = false; // Track if scene is initialized
 
         this.InitUI();
-        this.InitKeyboardControls();
-
-        // If starting with an empty scene, auto show the primitives bar for convenience
+        this.InitKeyboardControls();        // If starting with an empty scene, auto show the primitives bar for convenience
         if (this.model && this.model.MeshCount && this.model.MeshCount() === 0) {
-            const primitivesBar = document.getElementById('primitives_bar');
+            const primitivesBar = document.getElementById('studio_primitives_bar') || document.getElementById('primitives_bar');
             if (primitivesBar) {
-                primitivesBar.style.display = 'block';
+                primitivesBar.style.display = 'flex';
                 this.isEnabled = true;
                 this.ShowTransformInfo();
             }
@@ -39,11 +40,23 @@ export class PrimitivesManager
             });
         }
 
-        // Primitive icon events
+        // Primitive icon events - Updated to match HTML structure
+        const primitiveButtons = document.querySelectorAll('.prim_icon_btn');
+        primitiveButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const primitiveType = e.currentTarget.dataset.prim;
+                console.log(`Creating primitive: ${primitiveType}`);
+                this.CreatePrimitive(primitiveType);
+                this.SetActiveIcon(e.currentTarget);
+            });
+        });
+
+        // Also check for old class names for backward compatibility
         const primitiveIcons = document.querySelectorAll('.primitive_icon');
         primitiveIcons.forEach(icon => {
             icon.addEventListener('click', (e) => {
-                const primitiveType = e.currentTarget.dataset.primitive;
+                const primitiveType = e.currentTarget.dataset.primitive || e.currentTarget.dataset.prim;
+                console.log(`Creating primitive: ${primitiveType}`);
                 this.CreatePrimitive(primitiveType);
                 this.SetActiveIcon(e.currentTarget);
             });
@@ -92,10 +105,10 @@ export class PrimitivesManager
 
     TogglePrimitivesBar()
     {
-        const primitivesBar = document.getElementById('primitives_bar');
+        const primitivesBar = document.getElementById('studio_primitives_bar') || document.getElementById('primitives_bar');
         if (primitivesBar) {
             const isVisible = primitivesBar.style.display !== 'none';
-            primitivesBar.style.display = isVisible ? 'none' : 'block';
+            primitivesBar.style.display = isVisible ? 'none' : 'flex';
             this.isEnabled = !isVisible;
 
             if (this.isEnabled) {
@@ -109,6 +122,12 @@ export class PrimitivesManager
 
     CreatePrimitive(type)
     {
+        // Initialize scene on first primitive creation
+        if (!this.sceneInitialized) {
+            this.InitScene();
+            this.sceneInitialized = true;
+        }
+
         const mesh = this.GeneratePrimitiveMesh(type);
         if (!mesh) return;
 
@@ -125,6 +144,10 @@ export class PrimitivesManager
         const meshIndex = this.model.AddMesh(mesh);
         const materialIndex = this.model.AddMaterial(material);
 
+        // Set mesh name for BOM tree
+        const meshName = `${type.charAt(0).toUpperCase() + type.slice(1)}_${this.primitiveObjects.length + 1}`;
+        mesh.SetName(meshName);
+
         // Set mesh material
         for (let i = 0; i < mesh.TriangleCount(); i++) {
             mesh.GetTriangle(i).SetMaterial(materialIndex);
@@ -136,7 +159,9 @@ export class PrimitivesManager
             meshIndex: meshIndex,
             materialIndex: materialIndex,
             mesh: mesh,
+            threeMesh: null, // Will be set after viewer update
             material: material,
+            name: meshName,
             transform: {
                 position: new Coord3D(0, 0, 0),
                 rotation: new Coord3D(0, 0, 0),
@@ -147,13 +172,34 @@ export class PrimitivesManager
 
         this.primitiveObjects.push(primitiveObj);
 
+        // Add to BOM tree if available
+        if (this.treeViewManager) {
+            this.AddToBOMTree(primitiveObj);
+        }
+
         // Update viewer
         this.viewer.SetModel(this.model);
+
+        // Find the corresponding Three.js mesh in the viewer's scene
+        this.FindAndLinkThreeMesh(primitiveObj);
 
         // Auto-select new object
         this.SelectObject(primitiveObj);
 
-        console.log(`Created ${type} primitive`);
+        console.log(`Created ${type} primitive: ${meshName}`);
+    }
+
+    FindAndLinkThreeMesh(primitiveObj)
+    {
+        // Find the Three.js mesh in viewer's scene that corresponds to our primitive
+        if (this.viewer && this.viewer.scene) {
+            this.viewer.scene.traverse((object) => {
+                if (object.isMesh && object.name === primitiveObj.name) {
+                    primitiveObj.threeMesh = object;
+                    console.log(`Linked Three.js mesh for ${primitiveObj.name}`);
+                }
+            });
+        }
     }
 
     GeneratePrimitiveMesh(type)
@@ -494,6 +540,7 @@ export class PrimitivesManager
                 this.selectedObject.originalColor.b
             );
             this.viewer.SetModel(this.model);
+
             this.selectedObject = null;
             this.HideTransformInfo();
         }
@@ -598,5 +645,169 @@ export class PrimitivesManager
         if (this.transformInfo) {
             this.transformInfo.classList.remove('show');
         }
+    }
+
+    InitScene()
+    {
+        // Scene setup temporarily disabled to avoid THREE.js import issues
+        // O3DV has its own lighting and scene management
+        console.log('Scene initialized - using O3DV defaults');
+    }
+
+    AddGroundGrid()
+    {
+        // Grid helper for ground reference
+        const gridSize = 20;
+        const divisions = 20;
+        const colorCenter = 0x444444;
+        const colorGrid = 0x888888;
+
+        const gridHelper = new THREE.GridHelper(gridSize, divisions, colorCenter, colorGrid);
+        gridHelper.name = 'GroundGrid';
+        this.viewer.scene.add(gridHelper);
+
+        // Ground plane for better visualization
+        const groundGeometry = new THREE.PlaneGeometry(gridSize, gridSize);
+        const groundMaterial = new THREE.MeshLambertMaterial({
+            color: 0xf0f0f0,
+            transparent: true,
+            opacity: 0.1
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.name = 'GroundPlane';
+        this.viewer.scene.add(ground);
+    }
+
+    AddCoordinateSystem()
+    {
+        // XYZ coordinate system arrows
+        const axesHelper = new THREE.AxesHelper(2);
+        axesHelper.name = 'CoordinateSystem';
+        this.viewer.scene.add(axesHelper);
+
+        // Labels for axes
+        this.AddAxisLabels();
+    }
+
+    AddAxisLabels()
+    {
+        // Create simple colored sphere labels for X, Y, Z axes
+        const labelGeometry = new THREE.SphereGeometry(0.05, 8, 8);        // X axis - Red
+        const xMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const xLabel = new THREE.Mesh(labelGeometry, xMaterial);
+        xLabel.position.set(2.2, 0, 0);
+        xLabel.name = 'X-Label';
+        this.viewer.scene.add(xLabel);
+
+        // Y axis - Green
+        const yMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const yLabel = new THREE.Mesh(labelGeometry, yMaterial);
+        yLabel.position.set(0, 2.2, 0);
+        yLabel.name = 'Y-Label';
+        this.viewer.scene.add(yLabel);
+
+        // Z axis - Blue
+        const zMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+        const zLabel = new THREE.Mesh(labelGeometry, zMaterial);
+        zLabel.position.set(0, 0, 2.2);
+        zLabel.name = 'Z-Label';
+        this.viewer.scene.add(zLabel);
+    }
+
+    SetupLighting()
+    {
+        // Ambient light for general illumination
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+        ambientLight.name = 'AmbientLight';
+        this.viewer.scene.add(ambientLight);
+
+        // Main directional light (sun-like)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 5);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.name = 'MainLight';
+        this.viewer.scene.add(directionalLight);
+
+        // Spot light for additional accent lighting
+        const spotLight = new THREE.SpotLight(0xffffff, 0.5);
+        spotLight.position.set(-5, 8, 3);
+        spotLight.angle = Math.PI / 6;
+        spotLight.penumbra = 0.2;
+        spotLight.decay = 2;
+        spotLight.distance = 20;
+        spotLight.castShadow = true;
+        spotLight.name = 'SpotLight';
+        this.viewer.scene.add(spotLight);
+
+        // Enable shadows on renderer
+        if (this.viewer.renderer) {
+            this.viewer.renderer.shadowMap.enabled = true;
+            this.viewer.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        }
+    }
+
+    SetTreeViewManager(treeViewManager)
+    {
+        this.treeViewManager = treeViewManager;
+    }
+
+    AddToBOMTree(primitiveObj)
+    {
+        if (!this.treeViewManager) return;
+
+        // Create tree item for the primitive
+        const treeItem = {
+            name: primitiveObj.name,
+            type: 'primitive',
+            meshIndex: primitiveObj.meshIndex,
+            object: primitiveObj
+        };
+
+        // Add to tree view
+        this.treeViewManager.AddPrimitive(treeItem);
+    }
+
+    // Multi-selection support
+    SelectMultipleObjects(objects)
+    {
+        this.selectedObjects = objects;
+        this.UpdateSelection();
+    }
+
+    AddToSelection(object)
+    {
+        if (!this.selectedObjects.includes(object)) {
+            this.selectedObjects.push(object);
+            this.UpdateSelection();
+        }
+    }
+
+    RemoveFromSelection(object)
+    {
+        const index = this.selectedObjects.indexOf(object);
+        if (index > -1) {
+            this.selectedObjects.splice(index, 1);
+            this.UpdateSelection();
+        }
+    }
+
+    UpdateSelection()
+    {
+        // Update visual feedback for selected objects
+        this.primitiveObjects.forEach(obj => {
+            const isSelected = this.selectedObjects.includes(obj);
+            if (isSelected) {
+                // Highlight selected objects
+                obj.material.emissive = new THREE.Color(0x333333);
+            } else {
+                // Reset non-selected objects
+                obj.material.emissive = new THREE.Color(0x000000);
+            }
+        });
+
+        this.viewer.SetModel(this.model);
     }
 }

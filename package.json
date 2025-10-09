@@ -10,6 +10,10 @@
 		"3d",
 		"viewer",
 		"cad",
+		"2d",
+		"dwg",
+		"dxf",
+		"svg",
 		"3dm",
 		"3ds",
 		"3mf",
@@ -17,9 +21,11 @@
 		"bim",
 		"brep",
 		"dae",
+		"collada",
 		"fbx",
 		"fcstd",
 		"gltf",
+		"glb",
 		"ifc",
 		"iges",
 		"step",
@@ -27,7 +33,12 @@
 		"obj",
 		"off",
 		"ply",
-		"wrl"
+		"wrl",
+		"vrml",
+		"usdz",
+		"xyz",
+		"stpz",
+		"pointcloud"
 	],
 	"files": [
 		"build/engine/o3dv.min.js",
@@ -49,7 +60,7 @@
 		"build_website": "esbuild source/website/index.js --bundle --minify --global-name=OV --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=dist/o3dv.website.min.js",
 		"build_dist": "npm run build_website && npm run copy_assets_to_dist",
 		"build_prod": "npm run update_version && npm run build_website && npm run copy_assets_to_dist",
-		"copy_assets_to_dist": "powershell -Command \"Copy-Item website/*.html dist/; Copy-Item website/*.xml dist/; Copy-Item website/robots.txt dist/; Copy-Item website/studio.js dist/; Copy-Item -Recurse website/assets dist/ -Force; Copy-Item -Recurse website/info dist/ -Force; Copy-Item website/.htaccess dist/\"",
+		"copy_assets_to_dist": "powershell -Command \"Copy-Item website/*.html dist/; Copy-Item website/*.xml dist/; Copy-Item website/robots.txt dist/; Copy-Item website/studio.js dist/; Copy-Item -Recurse website/assets dist/ -Force; Copy-Item -Recurse website/info dist/ -Force; Copy-Item website/.htaccess dist/; Copy-Item website/formats-guide.html dist/; Copy-Item website/seo-tracking.html dist/\"",
 		"serve_dist": "npm run build_dist && http-server dist -a 127.0.0.1 -p 8080 --no-dotfiles -d false"
 	},
 	"devDependencies": {

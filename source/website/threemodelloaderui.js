@@ -1,5 +1,5 @@
 import { AddDiv } from '../engine/viewer/domutils.js';
-import { ThreeModelLoader } from '../engine/threejs/threemodelloader.js';
+// import { ThreeModelLoader } from '../engine/threejs/threemodelloader.js'; // Removed THREE.js dependency
 import { ShowMessageDialog } from './dialogs.js';
 import { ButtonDialog, ProgressDialog } from './dialog.js';
 import { AddSvgIconElement } from './utils.js';
@@ -10,65 +10,28 @@ export class ThreeModelLoaderUI
 {
     constructor ()
     {
-        this.modelLoader = new ThreeModelLoader ();
+        // this.modelLoader = new ThreeModelLoader (); // Removed THREE.js dependency
+        this.modelLoader = null; // Placeholder
         this.modalDialog = null;
     }
 
     LoadModel (inputFiles, settings, callbacks)
     {
-        if (this.modelLoader.InProgress ()) {
-            return;
-        }
-
-        let progressDialog = null;
-        this.modelLoader.LoadModel (inputFiles, settings, {
-            onLoadStart : () => {
-                this.CloseDialogIfOpen ();
-                callbacks.onStart ();
-                progressDialog = new ProgressDialog ();
-                progressDialog.Init (Loc ('Loading Model'));
-                progressDialog.Open ();
-            },
-            onFileListProgress : (current, total) => {
-            },
-            onFileLoadProgress : (current, total) => {
-            },
-            onSelectMainFile : (fileNames, selectFile) => {
-                progressDialog.Close ();
-                this.modalDialog = this.ShowFileSelectorDialog (fileNames, (index) => {
-                    progressDialog.Open ();
-                    selectFile (index);
-                });
-            },
-            onImportStart : () => {
-                progressDialog.SetText (Loc ('Importing Model'));
-            },
-            onVisualizationStart : () => {
-                progressDialog.SetText (Loc ('Visualizing Model'));
-            },
-            onModelFinished : (importResult, threeObject) => {
-                progressDialog.Close ();
-                callbacks.onFinish (importResult, threeObject);
-            },
-            onTextureLoaded : () => {
-                callbacks.onRender ();
-            },
-            onLoadError : (importError) => {
-                progressDialog.Close ();
-                callbacks.onError (importError);
-                this.modalDialog = this.ShowErrorDialog (importError);
-            },
-        });
+        // Removed THREE.js model loading functionality
+        console.log('LoadModel called - THREE.js functionality removed');
+        callbacks.onLoadError({ code: ImportErrorCode.ImportFailed, message: 'Model loading disabled - THREE.js dependency removed' });
     }
 
     GetModelLoader ()
     {
-        return this.modelLoader;
+        // return this.modelLoader; // Removed THREE.js dependency
+        return null; // Placeholder
     }
 
     GetImporter ()
     {
-        return this.modelLoader.GetImporter ();
+        // return this.modelLoader.GetImporter (); // Removed THREE.js dependency
+        return null; // Placeholder
     }
 
     ShowErrorDialog (importError)

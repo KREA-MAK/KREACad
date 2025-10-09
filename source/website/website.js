@@ -242,6 +242,11 @@ export class Website
         // Initialize PrimitivesManager
         this.primitivesManager = new PrimitivesManager (this.viewer, this.primitivesModel);
 
+        // Connect TreeView to PrimitivesManager
+        if (this.navigator && this.navigator.meshesPanel && this.navigator.meshesPanel.treeView) {
+            this.primitivesManager.SetTreeViewManager(this.navigator.meshesPanel.treeView);
+        }
+
         // KreaCAD Version Display
         this.AddVersionDisplay();
 
@@ -897,6 +902,14 @@ export class Website
                 }
             });
         }, false);
+
+        // Home key navigation
+        window.addEventListener ('keydown', (ev) => {
+            if (ev.key === 'Home' || ev.keyCode === 36) {
+                ev.preventDefault ();
+                this.GoToHome ();
+            }
+        }, false);
     }
 
     InitSidebar ()
@@ -1145,5 +1158,24 @@ export class Website
         versionDiv.title = `KreaCAD ${KreaCAD_VERSION.version}\nBuild: ${KreaCAD_VERSION.build}\nBuilt: ${new Date(KreaCAD_VERSION.timestamp).toLocaleString()}`;
 
         console.log('Version element created:', versionDiv); // Debug
+    }
+
+    GoToHome ()
+    {
+        // Clear current model and show intro screen
+        this.Clear ();
+        this.ShowIntroDiv ();
+
+        // Clear URL hash
+        if (window.location.hash) {
+            window.history.replaceState ('', document.title, window.location.pathname + window.location.search);
+        }
+
+        // Reset viewer state
+        if (this.viewer) {
+            this.viewer.Clear ();
+        }
+
+        HandleEvent ('navigation', 'home_key');
     }
 }

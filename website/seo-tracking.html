@@ -1,0 +1,197 @@
+<!-- Google Analytics & Search Console Integration for KreaCAD -->
+<!-- Insert this code before closing </head> tag in all HTML files -->
+
+<!-- Google Analytics 4 (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    // Configure GA4 with enhanced ecommerce and file format tracking
+    gtag('config', 'GA_MEASUREMENT_ID', {
+        // Enhanced measurement
+        enhanced_measurement: true,
+
+        // Custom parameters for CAD file tracking
+        custom_map: {
+            'custom_parameter_1': 'file_format',
+            'custom_parameter_2': 'file_size',
+            'custom_parameter_3': 'processing_time'
+        },
+
+        // Page view settings
+        page_title: document.title,
+        page_location: window.location.href
+    });
+
+    // Custom event tracking for file uploads and format usage
+    function trackFileUpload(fileFormat, fileSize, processingTime) {
+        gtag('event', 'file_upload', {
+            'event_category': 'CAD Files',
+            'event_label': fileFormat.toUpperCase(),
+            'value': Math.round(fileSize / 1024), // Size in KB
+            'custom_parameter_1': fileFormat,
+            'custom_parameter_2': fileSize,
+            'custom_parameter_3': processingTime
+        });
+    }
+
+    // Track format popularity
+    function trackFormatUsage(format) {
+        gtag('event', 'format_usage', {
+            'event_category': 'File Formats',
+            'event_action': 'open',
+            'event_label': format.toUpperCase(),
+            'format_type': format
+        });
+    }
+
+    // Track measurement tool usage
+    function trackMeasurement(toolType, value, unit) {
+        gtag('event', 'measurement', {
+            'event_category': 'Tools',
+            'event_action': toolType,
+            'event_label': unit,
+            'value': value
+        });
+    }
+
+    // Track performance metrics
+    function trackPerformance(metric, value) {
+        gtag('event', 'performance', {
+            'event_category': 'Performance',
+            'event_action': metric,
+            'value': value
+        });
+    }
+</script>
+
+<!-- Google Tag Manager (Optional - for advanced tracking) -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-XXXXXX');</script>
+
+<!-- Search Console Verification -->
+<meta name="google-site-verification" content="YOUR_SEARCH_CONSOLE_VERIFICATION_CODE" />
+
+<!-- Bing Webmaster Tools -->
+<meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE" />
+
+<!-- Yandex Webmaster -->
+<meta name="yandex-verification" content="YOUR_YANDEX_VERIFICATION_CODE" />
+
+<!-- Baidu Webmaster Tools -->
+<meta name="baidu-site-verification" content="YOUR_BAIDU_VERIFICATION_CODE" />
+
+<!-- Microsoft Clarity (Heatmaps and User Behavior) -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "YOUR_CLARITY_PROJECT_ID");
+</script>
+
+<!-- Hotjar Tracking (User Experience Analytics) -->
+<script>
+    (function(h,o,t,j,a,r){
+        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+        h._hjSettings={hjid:YOUR_HOTJAR_ID,hjsv:6};
+        a=o.getElementsByTagName('head')[0];
+        r=o.createElement('script');r.async=1;
+        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+        a.appendChild(r);
+    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+</script>
+
+<!-- Schema.org Breadcrumb JSON-LD -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://kreacad.com/"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "CAD Viewer",
+            "item": "https://kreacad.com/#viewer"
+        }
+    ]
+}
+</script>
+
+<!-- FAQ Schema for better SEO -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "What file formats does KreaCAD support?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "KreaCAD supports 23+ file formats including STEP, DXF, SVG, USDZ, IGES, STL, OBJ, PLY, GLTF, FBX, and many more CAD and 3D formats."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Can I measure weight and volume of 3D models?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, KreaCAD provides advanced measurement tools to calculate weight, volume, surface area, and dimensional analysis of your 3D models."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Is KreaCAD free to use?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, KreaCAD is completely free to use. No registration or download required - works directly in your web browser."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Does KreaCAD support Apple AR USDZ files?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, KreaCAD supports USDZ files for Apple AR applications and point cloud XYZ files for visualization."
+            }
+        }
+    ]
+}
+</script>
+
+<!-- Organization Schema -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "KreaCAD",
+    "url": "https://kreacad.com",
+    "logo": "https://kreacad.com/assets/logos/krea_logo.png",
+    "description": "Advanced 3D CAD viewer supporting 23+ file formats with measurement and analysis tools",
+    "foundingDate": "2025",
+    "founder": {
+        "@type": "Person",
+        "name": "Tansu Özçelebi"
+    },
+    "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Support",
+        "email": "support@kreacad.com"
+    },
+    "sameAs": [
+        "https://github.com/tansuozcelebi/KREACad"
+    ]
+}
+</script>

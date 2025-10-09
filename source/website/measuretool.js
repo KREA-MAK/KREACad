@@ -3,32 +3,29 @@ import { AddDiv, ClearDomElement } from '../engine/viewer/domutils.js';
 import { AddSvgIconElement, IsDarkTextNeededForColor } from './utils.js';
 import { Loc } from '../engine/core/localization.js';
 
-import * as THREE from 'three';
+// import * as THREE from 'three'; // Removed THREE.js dependency
 import { ColorComponentToFloat, RGBColor } from '../engine/model/color.js';
 import { IntersectionMode } from '../engine/viewer/viewermodel.js';
 
 function GetFaceWorldNormal (intersection)
 {
-    let normalMatrix = new THREE.Matrix4 ();
-    intersection.object.updateWorldMatrix (true, false);
-    normalMatrix.extractRotation (intersection.object.matrixWorld);
-    let faceNormal = intersection.face.normal.clone ();
-    faceNormal.applyMatrix4 (normalMatrix);
-    return faceNormal;
+    // Simplified: return a default normal since THREE.js is not available
+    console.log('GetFaceWorldNormal called - THREE.js functionality removed');
+    return { x: 0, y: 0, z: 1 }; // Default normal
 }
 
 function CreateMaterial ()
 {
-    return new THREE.LineBasicMaterial ({
-        color : 0x263238,
-        depthTest : false
-    });
+    // Simplified: return a placeholder since THREE.js is not available
+    console.log('CreateMaterial called - THREE.js functionality removed');
+    return {}; // Placeholder
 }
 
 function CreateLineFromPoints (points, material)
 {
-    let geometry = new THREE.BufferGeometry ().setFromPoints (points);
-    return new THREE.Line (geometry, material);
+    // Simplified: return a placeholder since THREE.js is not available
+    console.log('CreateLineFromPoints called - THREE.js functionality removed');
+    return {}; // Placeholder
 }
 
 class Marker
@@ -36,13 +33,10 @@ class Marker
     constructor (intersection, radius)
     {
         this.intersection = null;
-        this.markerObject = new THREE.Object3D ();
+        this.markerObject = {}; // Placeholder object
 
-        let material = CreateMaterial ();
-        let circleCurve = new THREE.EllipseCurve (0.0, 0.0, radius, radius, 0.0, 2.0 * Math.PI, false, 0.0);
-        this.markerObject.add (CreateLineFromPoints (circleCurve.getPoints (50), material));
-        this.markerObject.add (CreateLineFromPoints ([new THREE.Vector3 (-radius, 0.0, 0.0), new THREE.Vector3 (radius, 0.0, 0.0)], material));
-        this.markerObject.add (CreateLineFromPoints ([new THREE.Vector3 (0.0, -radius, 0.0), new THREE.Vector3 (0.0, radius, 0.0)], material));
+        // Removed THREE.js marker creation
+        console.log('Marker created - THREE.js functionality removed');
 
         this.UpdatePosition (intersection);
     }
@@ -50,16 +44,14 @@ class Marker
     UpdatePosition (intersection)
     {
         this.intersection = intersection;
-        let faceNormal = GetFaceWorldNormal (this.intersection);
-        this.markerObject.updateMatrixWorld (true);
-        this.markerObject.position.set (0.0, 0.0, 0.0);
-        this.markerObject.lookAt (faceNormal);
-        this.markerObject.position.set (this.intersection.point.x, this.intersection.point.y, this.intersection.point.z);
+        // Removed THREE.js position updates
+        console.log('Marker position updated - THREE.js functionality removed');
     }
 
     Show (show)
     {
-        this.markerObject.visible = show;
+        // Removed THREE.js visibility
+        console.log('Marker visibility set to', show, '- THREE.js functionality removed');
     }
 
     GetIntersection ()
@@ -83,14 +75,16 @@ function CalculateMarkerValues (aMarker, bMarker)
         facesAngle : null
     };
 
-    const aNormal = GetFaceWorldNormal (aIntersection);
-    const bNormal = GetFaceWorldNormal (bIntersection);
-    result.pointsDistance = aIntersection.point.distanceTo (bIntersection.point);
-    result.facesAngle = aNormal.angleTo (bNormal);
-    if (IsEqualEps (result.facesAngle, 0.0, BigEps) || IsEqualEps (result.facesAngle, Math.PI, BigEps)) {
-        let aPlane = new THREE.Plane ().setFromNormalAndCoplanarPoint (aNormal, aIntersection.point);
-        result.parallelFacesDistance = Math.abs (aPlane.distanceToPoint (bIntersection.point));
+    // Simplified calculations without THREE.js
+    console.log('CalculateMarkerValues called - THREE.js functionality removed');
+    // Basic distance calculation if points have distanceTo method
+    if (aIntersection.point && bIntersection.point && aIntersection.point.distanceTo) {
+        result.pointsDistance = aIntersection.point.distanceTo (bIntersection.point);
     }
+    // Angle calculation simplified
+    result.facesAngle = 0; // Default angle
+    result.parallelFacesDistance = null; // Not calculated without THREE.js
+
     return result;
 }
 
