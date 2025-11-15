@@ -736,6 +736,9 @@ export class SidebarSettingsPanel extends SidebarPanel {
       onBackgroundColorChanged: () => {
         this.callbacks.onBackgroundColorChanged();
       },
+      onBackgroundGradientChanged: () => {
+        this.callbacks.onBackgroundGradientChanged();
+      },
       onShowEdgesChange: () => {
         this.callbacks.onEdgeDisplayChanged();
       },
@@ -772,7 +775,10 @@ export class SidebarSettingsPanel extends SidebarPanel {
 
     this.settings.environmentMapName = defaultSettings.environmentMapName;
     this.settings.backgroundIsEnvMap = defaultSettings.backgroundIsEnvMap;
+    this.settings.backgroundIsGradient = defaultSettings.backgroundIsGradient;
     this.settings.backgroundColor = defaultSettings.backgroundColor;
+    this.settings.backgroundGradientTopColor = defaultSettings.backgroundGradientTopColor;
+    this.settings.backgroundGradientBottomColor = defaultSettings.backgroundGradientBottomColor;
     this.settings.defaultLineColor = defaultSettings.defaultLineColor;
     this.settings.defaultColor = defaultSettings.defaultColor;
     this.settings.edgeSettings = defaultSettings.edgeSettings;

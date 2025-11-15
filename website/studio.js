@@ -2,7 +2,15 @@
 // This file should be loaded with defer, not as a module
 
 // Get classes from global OV namespace
-const { Viewer, NavigationMode, ProjectionMode, Coord3D, Model, Mesh, RGBColor, PhysicalMaterial, PhongMaterial } = window.OV || {};
+const { Viewer, NavigationMode, ProjectionMode, Coord3D, Model, Mesh, Triangle, RGBColor, RGBAColor, PhysicalMaterial, PhongMaterial } = window.OV || {};
+
+// Debug: Check if OV is loaded
+if (!window.OV) {
+    console.error('OV global object not found! Make sure o3dv.website.min.js loads before studio.js');
+}
+if (!Viewer || !Model || !Mesh || !Triangle) {
+    console.error('Required OV classes not found:', { Viewer, Model, Mesh, Triangle });
+}
 
 // Simple PrimitivesManager subset for studio (inline to avoid module imports)
 // Full version is in source/website/primitivesmanager.js but we need a lightweight standalone version
@@ -64,8 +72,8 @@ class StudioPrimitivesManager {
             [0,1,2,3], [4,7,6,5], [0,4,5,1], [1,5,6,2], [2,6,7,3], [3,7,4,0]
         ];
         faces.forEach(f => {
-            mesh.AddTriangle(new OV.Triangle(f[0], f[1], f[2]));
-            mesh.AddTriangle(new OV.Triangle(f[0], f[2], f[3]));
+            mesh.AddTriangle(new Triangle(f[0], f[1], f[2]));
+            mesh.AddTriangle(new Triangle(f[0], f[2], f[3]));
         });
     }
 
@@ -87,8 +95,8 @@ class StudioPrimitivesManager {
             for (let seg = 0; seg < segments; seg++) {
                 const a = ring * (segments + 1) + seg;
                 const b = a + segments + 1;
-                mesh.AddTriangle(new OV.Triangle(a, b, a + 1));
-                mesh.AddTriangle(new OV.Triangle(b, b + 1, a + 1));
+                mesh.AddTriangle(new Triangle(a, b, a + 1));
+                mesh.AddTriangle(new Triangle(b, b + 1, a + 1));
             }
         }
     }
@@ -116,10 +124,10 @@ class StudioPrimitivesManager {
 
         // Caps and sides
         for (let i = 0; i < segments; i++) {
-            mesh.AddTriangle(new OV.Triangle(topCenter, topVerts[i], topVerts[i + 1]));
-            mesh.AddTriangle(new OV.Triangle(bottomCenter, bottomVerts[i + 1], bottomVerts[i]));
-            mesh.AddTriangle(new OV.Triangle(bottomVerts[i], topVerts[i], topVerts[i + 1]));
-            mesh.AddTriangle(new OV.Triangle(bottomVerts[i], topVerts[i + 1], bottomVerts[i + 1]));
+            mesh.AddTriangle(new Triangle(topCenter, topVerts[i], topVerts[i + 1]));
+            mesh.AddTriangle(new Triangle(bottomCenter, bottomVerts[i + 1], bottomVerts[i]));
+            mesh.AddTriangle(new Triangle(bottomVerts[i], topVerts[i], topVerts[i + 1]));
+            mesh.AddTriangle(new Triangle(bottomVerts[i], topVerts[i + 1], bottomVerts[i + 1]));
         }
     }
 
@@ -140,8 +148,8 @@ class StudioPrimitivesManager {
         }
 
         for (let i = 0; i < segments; i++) {
-            mesh.AddTriangle(new OV.Triangle(apex, baseVerts[i], baseVerts[i + 1]));
-            mesh.AddTriangle(new OV.Triangle(baseCenter, baseVerts[i + 1], baseVerts[i]));
+            mesh.AddTriangle(new Triangle(apex, baseVerts[i], baseVerts[i + 1]));
+            mesh.AddTriangle(new Triangle(baseCenter, baseVerts[i + 1], baseVerts[i]));
         }
     }
 
@@ -151,8 +159,8 @@ class StudioPrimitivesManager {
         const v1 = mesh.AddVertex(new Coord3D( s, 0, -s));
         const v2 = mesh.AddVertex(new Coord3D( s, 0,  s));
         const v3 = mesh.AddVertex(new Coord3D(-s, 0,  s));
-        mesh.AddTriangle(new OV.Triangle(v0, v1, v2));
-        mesh.AddTriangle(new OV.Triangle(v0, v2, v3));
+        mesh.AddTriangle(new Triangle(v0, v1, v2));
+        mesh.AddTriangle(new Triangle(v0, v2, v3));
     }
 
     SelectObject() {}
@@ -183,9 +191,9 @@ class PrimitiveStudio {
 
         this.viewer = new Viewer();
         this.viewer.Init(this.canvas);
-        this.viewer.SetBackgroundColor(new RGBColor(18, 20, 26));
-        this.viewer.SetNavigationMode(NavigationMode.Orbit);
-        this.viewer.camera.SetProjection(ProjectionMode.Perspective);
+        this.viewer.SetBackgroundColor(new RGBAColor(18, 20, 26, 255));
+        this.viewer.SetNavigationMode(NavigationMode.FixedUpVector);
+        this.viewer.SetUpVector(0, 1, 0, false);
 
         this.model = new Model();
         this.primitivesManager = new StudioPrimitivesManager(this.viewer, this.model);

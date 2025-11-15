@@ -75,6 +75,7 @@
 	"dependencies": {
 		"@simonwep/pickr": "1.9.0",
 		"fflate": "0.8.2",
+		"tailwind": "^4.0.0",
 		"three": "0.163.0"
 	},
 	"eslintConfig": {
