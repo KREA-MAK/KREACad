@@ -12,7 +12,7 @@ class StudioPrimitivesManager {
         this.model = model;
         this.selectedObject = null;
     }
-    
+
     CreatePhysicalMaterial() {
         const mat = new PhysicalMaterial();
         mat.color = new RGBColor(200, 200, 200);
@@ -21,11 +21,11 @@ class StudioPrimitivesManager {
         mat.opacity = 1.0;
         return mat;
     }
-    
+
     CreatePrimitive(type) {
         const mesh = new Mesh();
         mesh.SetName(type);
-        
+
         // Basic primitive generation (simplified)
         if (type === 'cube') {
             this.generateCube(mesh);
@@ -38,16 +38,16 @@ class StudioPrimitivesManager {
         } else if (type === 'plane') {
             this.generatePlane(mesh);
         }
-        
+
         const matIndex = this.model.AddMaterial(this.GenerateMaterial ? this.GenerateMaterial() : this.CreatePhysicalMaterial());
         for (let i = 0; i < mesh.TriangleCount(); i++) {
             mesh.GetTriangle(i).SetMaterial(matIndex);
         }
-        
+
         this.model.AddMeshToRootNode(mesh);
         this.viewer.SetModel(this.model);
     }
-    
+
     generateCube(mesh) {
         const s = 1.0;
         const v = [
@@ -68,7 +68,7 @@ class StudioPrimitivesManager {
             mesh.AddTriangle(new OV.Triangle(f[0], f[2], f[3]));
         });
     }
-    
+
     generateSphere(mesh) {
         const radius = 1.0;
         const segments = 32;
@@ -92,17 +92,17 @@ class StudioPrimitivesManager {
             }
         }
     }
-    
+
     generateCylinder(mesh) {
         const radius = 1.0;
         const height = 2.0;
         const segments = 32;
         const halfH = height / 2;
-        
+
         // Top and bottom centers
         const topCenter = mesh.AddVertex(new Coord3D(0, halfH, 0));
         const bottomCenter = mesh.AddVertex(new Coord3D(0, -halfH, 0));
-        
+
         // Side vertices
         const topVerts = [];
         const bottomVerts = [];
@@ -113,7 +113,7 @@ class StudioPrimitivesManager {
             topVerts.push(mesh.AddVertex(new Coord3D(x, halfH, z)));
             bottomVerts.push(mesh.AddVertex(new Coord3D(x, -halfH, z)));
         }
-        
+
         // Caps and sides
         for (let i = 0; i < segments; i++) {
             mesh.AddTriangle(new OV.Triangle(topCenter, topVerts[i], topVerts[i + 1]));
@@ -122,15 +122,15 @@ class StudioPrimitivesManager {
             mesh.AddTriangle(new OV.Triangle(bottomVerts[i], topVerts[i + 1], bottomVerts[i + 1]));
         }
     }
-    
+
     generateCone(mesh) {
         const radius = 1.0;
         const height = 2.0;
         const segments = 32;
-        
+
         const apex = mesh.AddVertex(new Coord3D(0, height / 2, 0));
         const baseCenter = mesh.AddVertex(new Coord3D(0, -height / 2, 0));
-        
+
         const baseVerts = [];
         for (let i = 0; i <= segments; i++) {
             const angle = (2 * Math.PI * i) / segments;
@@ -138,13 +138,13 @@ class StudioPrimitivesManager {
             const z = radius * Math.sin(angle);
             baseVerts.push(mesh.AddVertex(new Coord3D(x, -height / 2, z)));
         }
-        
+
         for (let i = 0; i < segments; i++) {
             mesh.AddTriangle(new OV.Triangle(apex, baseVerts[i], baseVerts[i + 1]));
             mesh.AddTriangle(new OV.Triangle(baseCenter, baseVerts[i + 1], baseVerts[i]));
         }
     }
-    
+
     generatePlane(mesh) {
         const s = 2.0;
         const v0 = mesh.AddVertex(new Coord3D(-s, 0, -s));
@@ -154,7 +154,7 @@ class StudioPrimitivesManager {
         mesh.AddTriangle(new OV.Triangle(v0, v1, v2));
         mesh.AddTriangle(new OV.Triangle(v0, v2, v3));
     }
-    
+
     SelectObject() {}
     DeselectObject() {}
 }
