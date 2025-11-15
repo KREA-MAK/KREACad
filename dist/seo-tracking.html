@@ -7,24 +7,24 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    
+
     // Configure GA4 with enhanced ecommerce and file format tracking
     gtag('config', 'GA_MEASUREMENT_ID', {
         // Enhanced measurement
         enhanced_measurement: true,
-        
+
         // Custom parameters for CAD file tracking
         custom_map: {
             'custom_parameter_1': 'file_format',
             'custom_parameter_2': 'file_size',
             'custom_parameter_3': 'processing_time'
         },
-        
+
         // Page view settings
         page_title: document.title,
         page_location: window.location.href
     });
-    
+
     // Custom event tracking for file uploads and format usage
     function trackFileUpload(fileFormat, fileSize, processingTime) {
         gtag('event', 'file_upload', {
@@ -36,7 +36,7 @@
             'custom_parameter_3': processingTime
         });
     }
-    
+
     // Track format popularity
     function trackFormatUsage(format) {
         gtag('event', 'format_usage', {
@@ -46,7 +46,7 @@
             'format_type': format
         });
     }
-    
+
     // Track measurement tool usage
     function trackMeasurement(toolType, value, unit) {
         gtag('event', 'measurement', {
@@ -56,7 +56,7 @@
             'value': value
         });
     }
-    
+
     // Track performance metrics
     function trackPerformance(metric, value) {
         gtag('event', 'performance', {
@@ -120,7 +120,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             "item": "https://kreacad.com/"
         },
         {
-            "@type": "ListItem", 
+            "@type": "ListItem",
             "position": 2,
             "name": "CAD Viewer",
             "item": "https://kreacad.com/#viewer"

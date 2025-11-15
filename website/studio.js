@@ -1,11 +1,163 @@
-import { Viewer } from '../source/engine/viewer/viewer.js';
-import { NavigationMode, ProjectionMode } from '../source/engine/viewer/camera.js';
-import { Coord3D } from '../source/engine/geometry/coord3d.js';
-import { Model } from '../source/engine/model/model.js';
-import { Mesh } from '../source/engine/model/mesh.js';
-import { RGBColor } from '../source/engine/model/color.js';
-import { PhysicalMaterial } from '../source/engine/model/material.js';
-import { PrimitivesManager } from '../source/website/primitivesmanager.js';
+// Wait for OV to be loaded from o3dv.website.min.js
+// This file should be loaded with defer, not as a module
+
+// Get classes from global OV namespace
+const { Viewer, NavigationMode, ProjectionMode, Coord3D, Model, Mesh, RGBColor, PhysicalMaterial, PhongMaterial } = window.OV || {};
+
+// Simple PrimitivesManager subset for studio (inline to avoid module imports)
+// Full version is in source/website/primitivesmanager.js but we need a lightweight standalone version
+class StudioPrimitivesManager {
+    constructor(viewer, model) {
+        this.viewer = viewer;
+        this.model = model;
+        this.selectedObject = null;
+    }
+    
+    CreatePhysicalMaterial() {
+        const mat = new PhysicalMaterial();
+        mat.color = new RGBColor(200, 200, 200);
+        mat.metalness = 0.0;
+        mat.roughness = 1.0;
+        mat.opacity = 1.0;
+        return mat;
+    }
+    
+    CreatePrimitive(type) {
+        const mesh = new Mesh();
+        mesh.SetName(type);
+        
+        // Basic primitive generation (simplified)
+        if (type === 'cube') {
+            this.generateCube(mesh);
+        } else if (type === 'sphere') {
+            this.generateSphere(mesh);
+        } else if (type === 'cylinder') {
+            this.generateCylinder(mesh);
+        } else if (type === 'cone') {
+            this.generateCone(mesh);
+        } else if (type === 'plane') {
+            this.generatePlane(mesh);
+        }
+        
+        const matIndex = this.model.AddMaterial(this.GenerateMaterial ? this.GenerateMaterial() : this.CreatePhysicalMaterial());
+        for (let i = 0; i < mesh.TriangleCount(); i++) {
+            mesh.GetTriangle(i).SetMaterial(matIndex);
+        }
+        
+        this.model.AddMeshToRootNode(mesh);
+        this.viewer.SetModel(this.model);
+    }
+    
+    generateCube(mesh) {
+        const s = 1.0;
+        const v = [
+            mesh.AddVertex(new Coord3D(-s, -s, -s)),
+            mesh.AddVertex(new Coord3D( s, -s, -s)),
+            mesh.AddVertex(new Coord3D( s,  s, -s)),
+            mesh.AddVertex(new Coord3D(-s,  s, -s)),
+            mesh.AddVertex(new Coord3D(-s, -s,  s)),
+            mesh.AddVertex(new Coord3D( s, -s,  s)),
+            mesh.AddVertex(new Coord3D( s,  s,  s)),
+            mesh.AddVertex(new Coord3D(-s,  s,  s))
+        ];
+        const faces = [
+            [0,1,2,3], [4,7,6,5], [0,4,5,1], [1,5,6,2], [2,6,7,3], [3,7,4,0]
+        ];
+        faces.forEach(f => {
+            mesh.AddTriangle(new OV.Triangle(f[0], f[1], f[2]));
+            mesh.AddTriangle(new OV.Triangle(f[0], f[2], f[3]));
+        });
+    }
+    
+    generateSphere(mesh) {
+        const radius = 1.0;
+        const segments = 32;
+        const rings = 16;
+        for (let ring = 0; ring <= rings; ring++) {
+            const phi = Math.PI * ring / rings;
+            for (let seg = 0; seg <= segments; seg++) {
+                const theta = 2 * Math.PI * seg / segments;
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.cos(phi);
+                const z = radius * Math.sin(phi) * Math.sin(theta);
+                mesh.AddVertex(new Coord3D(x, y, z));
+            }
+        }
+        for (let ring = 0; ring < rings; ring++) {
+            for (let seg = 0; seg < segments; seg++) {
+                const a = ring * (segments + 1) + seg;
+                const b = a + segments + 1;
+                mesh.AddTriangle(new OV.Triangle(a, b, a + 1));
+                mesh.AddTriangle(new OV.Triangle(b, b + 1, a + 1));
+            }
+        }
+    }
+    
+    generateCylinder(mesh) {
+        const radius = 1.0;
+        const height = 2.0;
+        const segments = 32;
+        const halfH = height / 2;
+        
+        // Top and bottom centers
+        const topCenter = mesh.AddVertex(new Coord3D(0, halfH, 0));
+        const bottomCenter = mesh.AddVertex(new Coord3D(0, -halfH, 0));
+        
+        // Side vertices
+        const topVerts = [];
+        const bottomVerts = [];
+        for (let i = 0; i <= segments; i++) {
+            const angle = (2 * Math.PI * i) / segments;
+            const x = radius * Math.cos(angle);
+            const z = radius * Math.sin(angle);
+            topVerts.push(mesh.AddVertex(new Coord3D(x, halfH, z)));
+            bottomVerts.push(mesh.AddVertex(new Coord3D(x, -halfH, z)));
+        }
+        
+        // Caps and sides
+        for (let i = 0; i < segments; i++) {
+            mesh.AddTriangle(new OV.Triangle(topCenter, topVerts[i], topVerts[i + 1]));
+            mesh.AddTriangle(new OV.Triangle(bottomCenter, bottomVerts[i + 1], bottomVerts[i]));
+            mesh.AddTriangle(new OV.Triangle(bottomVerts[i], topVerts[i], topVerts[i + 1]));
+            mesh.AddTriangle(new OV.Triangle(bottomVerts[i], topVerts[i + 1], bottomVerts[i + 1]));
+        }
+    }
+    
+    generateCone(mesh) {
+        const radius = 1.0;
+        const height = 2.0;
+        const segments = 32;
+        
+        const apex = mesh.AddVertex(new Coord3D(0, height / 2, 0));
+        const baseCenter = mesh.AddVertex(new Coord3D(0, -height / 2, 0));
+        
+        const baseVerts = [];
+        for (let i = 0; i <= segments; i++) {
+            const angle = (2 * Math.PI * i) / segments;
+            const x = radius * Math.cos(angle);
+            const z = radius * Math.sin(angle);
+            baseVerts.push(mesh.AddVertex(new Coord3D(x, -height / 2, z)));
+        }
+        
+        for (let i = 0; i < segments; i++) {
+            mesh.AddTriangle(new OV.Triangle(apex, baseVerts[i], baseVerts[i + 1]));
+            mesh.AddTriangle(new OV.Triangle(baseCenter, baseVerts[i + 1], baseVerts[i]));
+        }
+    }
+    
+    generatePlane(mesh) {
+        const s = 2.0;
+        const v0 = mesh.AddVertex(new Coord3D(-s, 0, -s));
+        const v1 = mesh.AddVertex(new Coord3D( s, 0, -s));
+        const v2 = mesh.AddVertex(new Coord3D( s, 0,  s));
+        const v3 = mesh.AddVertex(new Coord3D(-s, 0,  s));
+        mesh.AddTriangle(new OV.Triangle(v0, v1, v2));
+        mesh.AddTriangle(new OV.Triangle(v0, v2, v3));
+    }
+    
+    SelectObject() {}
+    DeselectObject() {}
+}
 
 // Simple helper to create a checker grid texture via canvas
 function createGrid (canvas) {
@@ -36,7 +188,7 @@ class PrimitiveStudio {
         this.viewer.camera.SetProjection(ProjectionMode.Perspective);
 
         this.model = new Model();
-        this.primitivesManager = new PrimitivesManager(this.viewer, this.model);
+        this.primitivesManager = new StudioPrimitivesManager(this.viewer, this.model);
 
         // Enhance selection: keep original color, overlay ghost (simple re-color approach for now)
         const originalSelect = this.primitivesManager.SelectObject.bind(this.primitivesManager);

@@ -610,11 +610,18 @@ export class Website
         if (resetColors) {
             let defaultSettings = new Settings (this.settings.themeId);
             this.settings.backgroundColor = defaultSettings.backgroundColor;
+            this.settings.backgroundIsGradient = defaultSettings.backgroundIsGradient;
+            this.settings.backgroundGradientTopColor = defaultSettings.backgroundGradientTopColor;
+            this.settings.backgroundGradientBottomColor = defaultSettings.backgroundGradientBottomColor;
             this.settings.defaultLineColor = defaultSettings.defaultLineColor;
             this.settings.defaultColor = defaultSettings.defaultColor;
             this.sidebar.UpdateControlsStatus ();
 
-            this.viewer.SetBackgroundColor (this.settings.backgroundColor);
+            if (this.settings.backgroundIsGradient) {
+                this.viewer.SetGradientBackground (this.settings.backgroundGradientTopColor, this.settings.backgroundGradientBottomColor);
+            } else {
+                this.viewer.SetBackgroundColor (this.settings.backgroundColor);
+            }
             let modelLoader = this.modelLoaderUI.GetModelLoader ();
             if (modelLoader.GetDefaultMaterials () !== null) {
                 ReplaceDefaultMaterialsColor (this.model, this.settings.defaultColor, this.settings.defaultLineColor);
@@ -630,7 +637,11 @@ export class Website
         let canvas = AddDomElement (this.parameters.viewerDiv, 'canvas');
         this.viewer.Init (canvas);
         this.viewer.SetEdgeSettings (this.settings.edgeSettings);
-        this.viewer.SetBackgroundColor (this.settings.backgroundColor);
+        if (this.settings.backgroundIsGradient) {
+            this.viewer.SetGradientBackground (this.settings.backgroundGradientTopColor, this.settings.backgroundGradientBottomColor);
+        } else {
+            this.viewer.SetBackgroundColor (this.settings.backgroundColor);
+        }
         this.viewer.SetNavigationMode (this.cameraSettings.navigationMode);
         this.viewer.SetProjectionMode (this.cameraSettings.projectionMode);
         this.UpdateEnvironmentMap ();
@@ -934,6 +945,17 @@ export class Website
             onBackgroundColorChanged : () => {
                 this.settings.SaveToCookies ();
                 this.viewer.SetBackgroundColor (this.settings.backgroundColor);
+                if (this.measureTool.IsActive ()) {
+                    this.measureTool.UpdatePanel ();
+                }
+            },
+            onBackgroundGradientChanged : () => {
+                this.settings.SaveToCookies ();
+                if (this.settings.backgroundIsGradient) {
+                    this.viewer.SetGradientBackground (this.settings.backgroundGradientTopColor, this.settings.backgroundGradientBottomColor);
+                } else {
+                    this.viewer.SetBackgroundColor (this.settings.backgroundColor);
+                }
                 if (this.measureTool.IsActive ()) {
                     this.measureTool.UpdatePanel ();
                 }

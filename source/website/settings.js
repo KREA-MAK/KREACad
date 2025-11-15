@@ -17,12 +17,17 @@ export class Settings
         this.themeId = themeId;
         this.environmentMapName = 'fishermans_bastion';
         this.backgroundIsEnvMap = false;
+        this.backgroundIsGradient = false;
         if (this.themeId === Theme.Light) {
             this.backgroundColor = new RGBAColor (255, 255, 255, 255);
+            this.backgroundGradientTopColor = new RGBColor (230, 230, 250);
+            this.backgroundGradientBottomColor = new RGBColor (255, 255, 255);
             this.defaultLineColor = new RGBColor (100, 100, 100);
             this.defaultColor = new RGBColor (200, 200, 200);
         } else if (this.themeId === Theme.Dark) {
             this.backgroundColor = new RGBAColor (42, 43, 46, 255);
+            this.backgroundGradientTopColor = new RGBColor (30, 30, 40);
+            this.backgroundGradientBottomColor = new RGBColor (60, 60, 70);
             this.defaultLineColor = new RGBColor (100, 100, 100);
             this.defaultColor = new RGBColor (200, 200, 200);
         }
@@ -34,7 +39,10 @@ export class Settings
         this.themeId = CookieGetIntVal ('ov_theme_id', GetPreferredColorScheme ());
         this.environmentMapName = CookieGetStringVal ('ov_environment_map', 'fishermans_bastion');
         this.backgroundIsEnvMap = CookieGetBoolVal ('ov_background_is_envmap', false);
+        this.backgroundIsGradient = CookieGetBoolVal ('ov_background_is_gradient', false);
         this.backgroundColor = CookieGetRGBAColorVal ('ov_background_color', new RGBAColor (255, 255, 255, 255));
+        this.backgroundGradientTopColor = CookieGetRGBColorVal ('ov_background_gradient_top', new RGBColor (230, 230, 250));
+        this.backgroundGradientBottomColor = CookieGetRGBColorVal ('ov_background_gradient_bottom', new RGBColor (255, 255, 255));
         this.defaultLineColor = CookieGetRGBColorVal ('ov_default_line_color', new RGBColor (100, 100, 100));
         this.defaultColor = CookieGetRGBColorVal ('ov_default_color', new RGBColor (200, 200, 200));
         this.edgeSettings.showEdges = CookieGetBoolVal ('ov_show_edges', false);
@@ -47,7 +55,10 @@ export class Settings
         CookieSetIntVal ('ov_theme_id', this.themeId);
         CookieSetStringVal ('ov_environment_map', this.environmentMapName);
         CookieSetBoolVal ('ov_background_is_envmap', this.backgroundIsEnvMap);
+        CookieSetBoolVal ('ov_background_is_gradient', this.backgroundIsGradient);
         CookieSetRGBAColorVal ('ov_background_color', this.backgroundColor);
+        CookieSetRGBColorVal ('ov_background_gradient_top', this.backgroundGradientTopColor);
+        CookieSetRGBColorVal ('ov_background_gradient_bottom', this.backgroundGradientBottomColor);
         CookieSetRGBColorVal ('ov_default_line_color', this.defaultLineColor);
         CookieSetRGBColorVal ('ov_default_color', this.defaultColor);
         CookieSetBoolVal ('ov_show_edges', this.edgeSettings.showEdges);
