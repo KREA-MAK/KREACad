@@ -11,6 +11,7 @@ import { MaterialSource, MaterialType } from '../engine/model/material.js';
 import { RGBColorToHexString } from '../engine/model/color.js';
 import { Unit } from '../engine/model/unit.js';
 import { Loc } from '../engine/core/localization.js';
+import { Model } from '../engine/model/model.js';
 
 function UnitToString (unit)
 {
@@ -54,6 +55,52 @@ export class SidebarDetailsPanel extends SidebarPanel
     GetIcon ()
     {
         return 'details';
+    }
+
+    ConvertVolumeToDm3 (volume, unit)
+    {
+        // Convert volume from model units to dm³
+        // 1 dm³ = 1000 cm³ = 1e6 mm³ = 0.001 m³
+        let volumeInDm3;
+        switch (unit) {
+            case Unit.Millimeter: // mm³ -> dm³
+                volumeInDm3 = volume / 1_000_000.0;
+                break;
+            case Unit.Centimeter: // cm³ -> dm³
+                volumeInDm3 = volume / 1000.0;
+                break;
+            case Unit.Meter: // m³ -> dm³
+                volumeInDm3 = volume * 1000.0;
+                break;
+            case Unit.Inch: {
+                // 1 inch = 25.4 mm => 1 in³ = 25.4^3 mm³
+                const mm3 = volume * Math.pow(25.4, 3);
+                volumeInDm3 = mm3 / 1_000_000.0;
+                break;
+            }
+            case Unit.Foot: {
+                // 1 foot = 304.8 mm => 1 ft³ = 304.8^3 mm³
+                const mm3 = volume * Math.pow(304.8, 3);
+                volumeInDm3 = mm3 / 1_000_000.0;
+                break;
+            }
+            default:
+                volumeInDm3 = volume; // fallback (assume already dm³)
+        }
+        return volumeInDm3;
+    }
+
+    CalculateWeightFromVolume (volume, unit)
+    {
+        if (volume <= 0 || isNaN(volume)) {
+            return null;
+        }
+        const volumeInDm3 = this.ConvertVolumeToDm3(volume, unit);
+        if (!isFinite(volumeInDm3)) {
+            return null;
+        }
+        const densityKgPerDm3 = this.selectedMaterial.density;
+        return volumeInDm3 * densityKgPerDm3;
     }
 
     AddObject3DProperties (model, object3D)
@@ -101,48 +148,46 @@ export class SidebarDetailsPanel extends SidebarPanel
         });
         // KreaCAD Weight Calculation
         this.AddCalculatedProperty (table, Loc ('Weight'), () => {
-            if (!IsTwoManifold (object3D)) {
-                return null;
-            }
-            const volume = CalculateVolume (object3D); // in model unit^3
-            if (volume <= 0 || isNaN(volume)) {
-                return null;
-            }
-            // Convert volume from model units to dm³.
-            // 1 dm³ = 1000 cm³ = 1e6 mm³ = 0.001 m³
-            let volumeInDm3;
-            switch (unit) {
-                case Unit.Millimeter: // mm³ -> dm³
-                    volumeInDm3 = volume / 1_000_000.0; // correct factor
-                    break;
-                case Unit.Centimeter: // cm³ -> dm³
-                    volumeInDm3 = volume / 1000.0;
-                    break;
-                case Unit.Meter: // m³ -> dm³
-                    volumeInDm3 = volume * 1000.0;
-                    break;
-                case Unit.Inch: {
-                    // 1 inch = 25.4 mm => 1 in³ = 25.4^3 mm³
-                    const mm3 = volume * Math.pow(25.4, 3);
-                    volumeInDm3 = mm3 / 1_000_000.0;
-                    break;
+            // Check if this is a Model (assembly) or individual mesh
+            if (object3D instanceof Model) {
+                // Calculate total weight for assembly
+                let totalWeight = 0;
+                let validMeshCount = 0;
+                
+                model.EnumerateMeshInstances ((meshInstance) => {
+                    if (IsTwoManifold (meshInstance)) {
+                        const volume = CalculateVolume (meshInstance);
+                        const weight = this.CalculateWeightFromVolume(volume, unit);
+                        if (weight !== null) {
+                            totalWeight += weight;
+                            validMeshCount++;
+                        }
+                    }
+                });
+                
+                if (validMeshCount === 0) {
+                    return null;
                 }
-                case Unit.Foot: {
-                    // 1 foot = 304.8 mm => 1 ft³ = 304.8^3 mm³
-                    const mm3 = volume * Math.pow(304.8, 3);
-                    volumeInDm3 = mm3 / 1_000_000.0;
-                    break;
+                return new Property (PropertyType.Text, null, totalWeight.toFixed(2) + ' kg (Total)');
+            } else {
+                // Individual mesh weight calculation
+                if (!IsTwoManifold (object3D)) {
+                    return null;
                 }
-                default:
-                    volumeInDm3 = volume; // fallback (assume already dm³)
+                const volume = CalculateVolume (object3D);
+                const weightKg = this.CalculateWeightFromVolume(volume, unit);
+                if (weightKg === null) {
+                    return null;
+                }
+                return new Property (PropertyType.Text, null, weightKg.toFixed(2) + ' kg');
             }
-            if (!isFinite(volumeInDm3)) {
-                return null;
-            }
-            const densityKgPerDm3 = this.selectedMaterial.density; // stored as kg/dm³
-            const weightKg = volumeInDm3 * densityKgPerDm3;
-            return new Property (PropertyType.Text, null, weightKg.toFixed(2) + ' kg');
         });
+
+        // Add CSV Export button for assembly
+        if (object3D instanceof Model) {
+            this.AddExportToCSVButton (table);
+        }
+
         if (object3D.PropertyGroupCount () > 0) {
             let customTable = AddDiv (this.contentDiv, 'ov_property_table ov_property_table_custom');
             for (let i = 0; i < object3D.PropertyGroupCount (); i++) {
@@ -313,5 +358,60 @@ export class SidebarDetailsPanel extends SidebarPanel
                 this.AddObject3DProperties(this.currentModel, this.currentObject3D);
             }
         });
+    }
+
+    AddExportToCSVButton (table)
+    {
+        let row = AddDiv (table, 'ov_property_table_row');
+        let nameColumn = AddDiv (row, 'ov_property_table_cell ov_property_table_name', Loc ('Export Parts List') + ':');
+        let valueColumn = AddDiv (row, 'ov_property_table_cell ov_property_table_value');
+        nameColumn.setAttribute ('title', Loc ('Export Parts List'));
+
+        let exportButton = AddDiv (valueColumn, 'ov_property_table_button', Loc ('Export to CSV'));
+        exportButton.addEventListener ('click', () => {
+            this.ExportPartsListToCSV ();
+        });
+    }
+
+    ExportPartsListToCSV ()
+    {
+        if (!this.currentModel) {
+            return;
+        }
+
+        const unit = this.currentModel.GetUnit ();
+        let csvContent = 'Part Name,Volume (' + UnitToString(unit) + '³),Weight (kg),Material\n';
+        
+        let partIndex = 1;
+        this.currentModel.EnumerateMeshInstances ((meshInstance) => {
+            const meshName = meshInstance.GetName() || 'Part ' + partIndex;
+            
+            if (IsTwoManifold (meshInstance)) {
+                const volume = CalculateVolume (meshInstance);
+                const weight = this.CalculateWeightFromVolume(volume, unit);
+                
+                if (volume > 0 && weight !== null) {
+                    // Escape commas in name
+                    const escapedName = '"' + meshName.replace(/"/g, '""') + '"';
+                    csvContent += escapedName + ',' + 
+                                  volume.toFixed(4) + ',' + 
+                                  weight.toFixed(2) + ',' + 
+                                  this.selectedMaterial.name + '\n';
+                }
+            }
+            partIndex++;
+        });
+
+        // Create and download CSV file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'parts_list.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
