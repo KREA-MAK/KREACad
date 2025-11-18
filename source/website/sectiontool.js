@@ -175,6 +175,22 @@ export class SectionTool
     {
         this.clippingEnabled = false;
         this.viewer.renderer.clippingPlanes = [];
+        
+        // Remove clipping from all meshes
+        this.viewer.mainModel.Traverse ((obj) => {
+            if (obj.isMesh) {
+                if (Array.isArray (obj.material)) {
+                    obj.material.forEach ((mat) => {
+                        mat.clippingPlanes = [];
+                        mat.needsUpdate = true;
+                    });
+                } else if (obj.material) {
+                    obj.material.clippingPlanes = [];
+                    obj.material.needsUpdate = true;
+                }
+            }
+        });
+        
         this.viewer.Render ();
     }
 
@@ -186,6 +202,26 @@ export class SectionTool
 
         this.viewer.renderer.clippingPlanes = [this.sectionPlane];
         this.viewer.renderer.localClippingEnabled = true;
+        
+        // Enable stencil buffer for capped clipping
+        this.viewer.renderer.localClippingEnabled = true;
+        
+        // Apply clipping to all meshes and enable clipping planes
+        this.viewer.mainModel.Traverse ((obj) => {
+            if (obj.isMesh) {
+                if (Array.isArray (obj.material)) {
+                    obj.material.forEach ((mat) => {
+                        mat.clippingPlanes = [this.sectionPlane];
+                        mat.clipShadows = true;
+                        mat.needsUpdate = true;
+                    });
+                } else if (obj.material) {
+                    obj.material.clippingPlanes = [this.sectionPlane];
+                    obj.material.clipShadows = true;
+                    obj.material.needsUpdate = true;
+                }
+            }
+        });
     }
 
     SetTransformMode (mode)
@@ -224,23 +260,30 @@ export class SectionTool
         
         let contentDiv = AddDiv (this.panelDiv, 'ov_measure_panel_content');
         
+        // Description
+        let descRow = AddDiv (contentDiv, 'ov_measure_panel_row');
+        descRow.innerHTML = Loc ('Use the gizmo to position and rotate the section plane. Enable clipping to cut the model.');
+        descRow.style.fontSize = '11px';
+        descRow.style.marginBottom = '10px';
+        descRow.style.opacity = '0.8';
+        
         // Clipping toggle
         let clippingRow = AddDiv (contentDiv, 'ov_measure_panel_row');
         let clippingLabel = document.createElement ('label');
         clippingLabel.innerHTML = Loc ('Enable Clipping') + ': ';
         clippingLabel.style.marginRight = '8px';
-        let clippingCheckbox = document.createElement ('input');
-        clippingCheckbox.type = 'checkbox';
-        clippingCheckbox.checked = this.clippingEnabled;
-        clippingCheckbox.addEventListener ('change', () => {
-            if (clippingCheckbox.checked) {
+        this.clippingCheckbox = document.createElement ('input');
+        this.clippingCheckbox.type = 'checkbox';
+        this.clippingCheckbox.checked = this.clippingEnabled;
+        this.clippingCheckbox.addEventListener ('change', () => {
+            if (this.clippingCheckbox.checked) {
                 this.EnableClipping ();
             } else {
                 this.DisableClipping ();
             }
         });
         clippingRow.appendChild (clippingLabel);
-        clippingRow.appendChild (clippingCheckbox);
+        clippingRow.appendChild (this.clippingCheckbox);
         
         // Transform mode selector
         let modeRow = AddDiv (contentDiv, 'ov_measure_panel_row');
