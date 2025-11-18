@@ -5,7 +5,7 @@ import { CalculateVolume, CalculateSurfaceArea } from '../engine/model/quantitie
 import { Property, PropertyToString, PropertyType } from '../engine/model/property.js';
 import { AddDiv, AddDomElement, ClearDomElement } from '../engine/viewer/domutils.js';
 import { SidebarPanel } from './sidebarpanel.js';
-import { CreateInlineColorCircle } from './utils.js';
+import { CreateInlineColorCircle, GetMeshName } from './utils.js';
 import { GetFileName, IsUrl } from '../engine/io/fileutils.js';
 import { MaterialSource, MaterialType } from '../engine/model/material.js';
 import { RGBColorToHexString } from '../engine/model/color.js';
@@ -384,7 +384,10 @@ export class SidebarDetailsPanel extends SidebarPanel
         
         let partIndex = 1;
         this.currentModel.EnumerateMeshInstances ((meshInstance) => {
-            const meshName = meshInstance.GetName() || 'Part ' + partIndex;
+            // Get proper mesh name using node and mesh names
+            const nodeName = meshInstance.node.GetName();
+            const meshName = meshInstance.mesh.GetName();
+            const displayName = GetMeshName(nodeName, meshName);
             
             if (IsTwoManifold (meshInstance)) {
                 const volume = CalculateVolume (meshInstance);
@@ -392,7 +395,7 @@ export class SidebarDetailsPanel extends SidebarPanel
                 
                 if (volume > 0 && weight !== null) {
                     // Escape commas in name
-                    const escapedName = '"' + meshName.replace(/"/g, '""') + '"';
+                    const escapedName = '"' + displayName.replace(/"/g, '""') + '"';
                     csvContent += escapedName + ',' + 
                                   volume.toFixed(4) + ',' + 
                                   weight.toFixed(2) + ',' + 
