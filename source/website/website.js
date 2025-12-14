@@ -23,6 +23,7 @@ import { GetDefaultMaterials, ReplaceDefaultMaterialsColor } from '../engine/mod
 import { Direction } from '../engine/geometry/geometry.js';
 import { CookieGetBoolVal, CookieSetBoolVal } from './cookiehandler.js';
 import { MeasureTool } from './measuretool.js';
+import { SectionTool } from './sectiontool.js';
 import { KreaCAD_VERSION } from './version.js';
 import { CloseAllDialogs, ButtonDialog } from './dialog.js';
 import { CreateVerticalSplitter } from './splitter.js';
@@ -43,13 +44,14 @@ const WebsiteUIState =
 
 class WebsiteLayouter
 {
-    constructor (parameters, navigator, sidebar, viewer, measureTool)
+    constructor (parameters, navigator, sidebar, viewer, measureTool, sectionTool)
     {
         this.parameters = parameters;
         this.navigator = navigator;
         this.sidebar = sidebar;
         this.viewer = viewer;
         this.measureTool = measureTool;
+        this.sectionTool = sectionTool;
         this.limits = {
             minPanelWidth : 290,
             minCanvasWidth : 100
@@ -183,6 +185,7 @@ class WebsiteLayouter
         this.parameters.introContentDiv.style.top = introContentTop.toString () + 'px';
 
         this.measureTool.Resize ();
+        this.sectionTool.Resize ();
     }
 }
 
@@ -195,6 +198,7 @@ export class Website
         this.cameraSettings = new CameraSettings ();
         this.viewer = new Viewer ();
         this.measureTool = new MeasureTool (this.viewer, this.settings);
+        this.sectionTool = new SectionTool (this.viewer, this.settings);
         this.hashHandler = new HashHandler ();
         this.toolbar = new Toolbar (this.parameters.toolbarDiv);
         this.navigator = new Navigator (this.parameters.navigatorDiv);
@@ -203,7 +207,7 @@ export class Website
         this.themeHandler = new ThemeHandler ();
         this.highlightColor = new RGBColor (142, 201, 240);
         this.uiState = WebsiteUIState.Undefined;
-        this.layouter = new WebsiteLayouter (this.parameters, this.navigator, this.sidebar, this.viewer, this.measureTool);
+        this.layouter = new WebsiteLayouter (this.parameters, this.navigator, this.sidebar, this.viewer, this.measureTool, this.sectionTool);
         this.model = null;
         this.primitivesModel = new Model ();
         this.primitivesManager = null;
@@ -765,8 +769,20 @@ export class Website
             HandleEvent ('measure_tool_activated', isSelected ? 'on' : 'off');
             this.navigator.SetSelection (null);
             this.measureTool.SetActive (isSelected);
+            if (isSelected && this.sectionTool.IsActive ()) {
+                this.sectionTool.SetActive (false);
+            }
         });
         this.measureTool.SetButton (measureToolButton);
+        let sectionToolButton = AddPushButton (this.toolbar, 'section', Loc ('Section'), ['only_full_width', 'only_on_model'], (isSelected) => {
+            HandleEvent ('section_tool_activated', isSelected ? 'on' : 'off');
+            this.navigator.SetSelection (null);
+            this.sectionTool.SetActive (isSelected);
+            if (isSelected && this.measureTool.IsActive ()) {
+                this.measureTool.SetActive (false);
+            }
+        });
+        this.sectionTool.SetButton (sectionToolButton);
         AddSeparator (this.toolbar, ['only_full_width', 'only_on_model']);
         AddButton (this.toolbar, 'download', Loc ('Download'), ['only_full_width', 'only_on_model'], () => {
             HandleEvent ('model_downloaded', '');
