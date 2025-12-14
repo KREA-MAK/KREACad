@@ -32,7 +32,8 @@ class StudioPrimitivesManager {
 
     CreatePrimitive(type) {
         const mesh = new Mesh();
-        mesh.SetName(type);
+        const meshName = `${type}_${this.model.MeshCount() + 1}`;
+        mesh.SetName(meshName);
 
         // Basic primitive generation (simplified)
         if (type === 'cube') {
@@ -47,13 +48,16 @@ class StudioPrimitivesManager {
             this.generatePlane(mesh);
         }
 
-        const matIndex = this.model.AddMaterial(this.GenerateMaterial ? this.GenerateMaterial() : this.CreatePhysicalMaterial());
+        const material = this.GenerateMaterial ? this.GenerateMaterial() : this.CreatePhysicalMaterial();
+        const matIndex = this.model.AddMaterial(material);
         for (let i = 0; i < mesh.TriangleCount(); i++) {
             mesh.GetTriangle(i).SetMaterial(matIndex);
         }
 
-        this.model.AddMeshToRootNode(mesh);
+        const meshIndex = this.model.AddMeshToRootNode(mesh);
         this.viewer.SetModel(this.model);
+
+        return { meshIndex, materialIndex: matIndex, material, meshName };
     }
 
     generateCube(mesh) {
@@ -198,6 +202,12 @@ class PrimitiveStudio {
         this.model = new Model();
         this.primitivesManager = new StudioPrimitivesManager(this.viewer, this.model);
 
+        this.sceneTreeList = document.getElementById('scene_tree_list');
+        this.sceneTreeEmpty = document.getElementById('scene_tree_empty');
+        this.sceneTreeBody = document.getElementById('scene_tree_body');
+        this.sceneTreeToggle = document.getElementById('scene_tree_toggle');
+        this.selectedMeshIndex = null;
+
         // Enhance selection: keep original color, overlay ghost (simple re-color approach for now)
         const originalSelect = this.primitivesManager.SelectObject.bind(this.primitivesManager);
         this.primitivesManager.SelectObject = (obj) => {
@@ -221,16 +231,17 @@ class PrimitiveStudio {
             return mat;
         };
 
-    this.initLights();
-    this.initGround();
-    this.initUI();
+        this.initLights();
+        this.initGround();
+        this.initUI();
+        this.initTreeUI();
 
-    // Check URL parameters to determine if primitives bar should be shown
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
+        // Check URL parameters to determine if primitives bar should be shown
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
 
-    // After ground creation, fit camera if we have any mesh
-    this.fitScene();
+        // After ground creation, fit camera if we have any mesh
+        this.fitScene();
         // No longer auto-populate primitive_bar; handled by static HTML in toolbar
 
         // Show the primitives bar by default
@@ -239,6 +250,7 @@ class PrimitiveStudio {
             primitivesBar.style.display = 'flex';
         }
 
+<<<<<<< Updated upstream
         // Only add default cube and show primitives if in 'new' mode
         if (mode === 'new') {
             // Add a default cube so the scene isn't empty/dark
@@ -248,6 +260,22 @@ class PrimitiveStudio {
                 this.viewer.SetModel(this.model);
                 this.focusOnModel();
             }
+=======
+        // Add a default cube on page load if scene is empty to prevent black screen
+        if (this.model.MeshCount() === 0) {
+            this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
+            const info = this.primitivesManager.CreatePrimitive('cube');
+            this.viewer.SetModel(this.model);
+            this.selectedMeshIndex = info ? info.meshIndex : 0;
+        }
+
+        this.renderSceneTree();
+        if (this.model.MeshCount() > 0 && this.selectedMeshIndex === null) {
+            this.selectedMeshIndex = 0;
+        }
+        if (this.selectedMeshIndex !== null) {
+            this.selectMesh(this.selectedMeshIndex);
+>>>>>>> Stashed changes
         }
 
         this.initDebugOverlay();
@@ -310,6 +338,9 @@ class PrimitiveStudio {
             this.model = new Model();
             this.primitivesManager.model = this.model;
             this.viewer.SetModel(this.model);
+            this.selectedMeshIndex = null;
+            this.primitivesManager.selectedObject = null;
+            this.renderSceneTree();
         });
         document.getElementById('back_btn').addEventListener('click', () => {
             // Prefer history navigation to preserve previous page state/header.
@@ -336,12 +367,104 @@ class PrimitiveStudio {
         });
     }
 
+    initTreeUI () {
+        if (this.sceneTreeToggle && this.sceneTreeBody) {
+            this.sceneTreeToggle.addEventListener('click', () => {
+                const isHidden = this.sceneTreeBody.classList.toggle('collapsed');
+                this.sceneTreeBody.style.display = isHidden ? 'none' : 'flex';
+                this.sceneTreeToggle.textContent = isHidden ? 'Show' : 'Hide';
+                this.sceneTreeToggle.setAttribute('aria-expanded', (!isHidden).toString());
+            });
+        }
+
+        this.renderSceneTree();
+    }
+
+    renderSceneTree () {
+        if (!this.sceneTreeList) return;
+        const count = this.model.MeshCount();
+        this.sceneTreeList.innerHTML = '';
+
+        if (this.sceneTreeEmpty) {
+            this.sceneTreeEmpty.style.display = count === 0 ? 'block' : 'none';
+        }
+        if (count === 0) {
+            return;
+        }
+
+        for (let i = 0; i < count; i++) {
+            const mesh = this.model.GetMesh(i);
+            const name = mesh && mesh.GetName ? mesh.GetName() : `Mesh_${i + 1}`;
+            const tris = mesh && mesh.TriangleCount ? mesh.TriangleCount() : 0;
+
+            const item = document.createElement('button');
+            item.className = 'scene_tree_item' + (this.selectedMeshIndex === i ? ' active' : '');
+            item.innerHTML = `<span class="scene_tree_name">${name}</span><span class="scene_tree_meta">${tris} tris</span>`;
+            item.addEventListener('click', () => {
+                this.selectMesh(i);
+            });
+            this.sceneTreeList.appendChild(item);
+        }
+    }
+
+    getMeshMaterial (meshIndex) {
+        const mesh = this.model.GetMesh(meshIndex);
+        if (!mesh || mesh.TriangleCount() === 0) return null;
+        const tri = mesh.GetTriangle(0);
+        if (!tri || tri.mat === null || tri.mat === undefined) return null;
+        return this.model.GetMaterial(tri.mat);
+    }
+
+    syncMaterialUI (mat) {
+        if (!mat) return;
+        const metalSlider = document.getElementById('metalness_slider');
+        const roughSlider = document.getElementById('roughness_slider');
+        const opacitySlider = document.getElementById('opacity_slider');
+        if (metalSlider) {
+            metalSlider.value = mat.metalness ?? metalSlider.value;
+            document.getElementById('metalness_val').textContent = parseFloat(metalSlider.value).toFixed(2);
+        }
+        if (roughSlider) {
+            roughSlider.value = mat.roughness ?? roughSlider.value;
+            document.getElementById('roughness_val').textContent = parseFloat(roughSlider.value).toFixed(2);
+        }
+        if (opacitySlider) {
+            opacitySlider.value = mat.opacity ?? opacitySlider.value;
+            document.getElementById('opacity_val').textContent = parseFloat(opacitySlider.value).toFixed(2);
+        }
+    }
+
+    selectMesh (meshIndex) {
+        this.selectedMeshIndex = meshIndex;
+        const mat = this.getMeshMaterial(meshIndex);
+        if (mat) {
+            this.primitivesManager.selectedObject = { material: mat };
+            this.syncMaterialUI(mat);
+        }
+        this.focusMesh(meshIndex);
+        this.renderSceneTree();
+    }
+
+    focusMesh (meshIndex) {
+        const sphere = this.viewer.GetBoundingSphere((meshUserData) => {
+            if (!meshUserData || !meshUserData.originalMeshInstance) return false;
+            return meshUserData.originalMeshInstance.id.meshIndex === meshIndex;
+        });
+        if (sphere) {
+            this.viewer.FitSphereToWindow(sphere, false);
+        } else {
+            this.focusOnModel();
+        }
+    }
+
     createPrimitive (type, btn) {
         this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
-        this.primitivesManager.CreatePrimitive(type);
-    document.querySelectorAll('#studio_primitives_bar .prim_icon_btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-        this.focusOnModel();
+        const info = this.primitivesManager.CreatePrimitive(type);
+        const meshIndex = info ? info.meshIndex : this.model.MeshCount() - 1;
+        document.querySelectorAll('#studio_primitives_bar .prim_icon_btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.renderSceneTree();
+        this.selectMesh(meshIndex);
     }
 
     updateSelectedMaterial () {
