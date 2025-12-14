@@ -113,6 +113,36 @@
     <!-- plugins start -->
     <!-- plugins end -->
 
+    <style>
+        /* Format buttons styling */
+        .intro_file_formats a {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 6px 6px 0 0;
+            border-radius: 10px;
+            background: rgba(24,30,40,0.85);
+            color: #e8f5ff;
+            text-decoration: none;
+            border: 1px solid rgba(120,190,255,0.35);
+            box-shadow: 0 10px 24px -12px rgba(0,0,0,0.8), 0 0 0 0 rgba(120,190,255,0.0);
+            transform: scale(1);
+            transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+            will-change: transform;
+        }
+        .intro_file_formats a:hover {
+            transform: scale(1.10);
+            background: rgba(30,38,48,0.95);
+            border-color: rgba(120,190,255,0.55);
+            box-shadow: 0 16px 30px -12px rgba(0,180,255,0.45), 0 0 0 2px rgba(120,190,255,0.35);
+        }
+        /* Optional: keyboard focus */
+        .intro_file_formats a:focus {
+            outline: none;
+            transform: scale(1.10);
+            box-shadow: 0 16px 30px -12px rgba(0,180,255,0.45), 0 0 0 2px rgba(120,190,255,0.35);
+        }
+    </style>
+
     <!-- website analytics start -->
     <script type="text/javascript">
         OV.SetWebsiteEventHandler ((eventName, eventLabel, eventParams) => {
@@ -182,7 +212,7 @@
                     <a href="#model=assets/models/DamagedHelmet.glb">gltf</a>
                     <a href="#model=assets/models/haus.ifc">ifc</a>
                     <a href="#model=assets/models/as1_pe_203.igs">iges</a>
-                    <a href="#model=assets/models/as1_pe_203.stp">step</a>
+                    <a href="#model=assets/models/krea_logo.stp">step</a>
                     <a href="#model=assets/models/sample_compressed.stpz">stpz</a>
                     <a href="#model=assets/models/utah_teapot.stl">stl</a>
                     <a href="#model=assets/models/sample_design.svg">svg</a>
