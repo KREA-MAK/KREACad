@@ -239,15 +239,13 @@ class PrimitiveStudio {
             primitivesBar.style.display = 'flex';
         }
 
-        // Only add default cube and show primitives if in 'new' mode
-        if (mode === 'new') {
-            // Add a default cube so the scene isn't empty/dark
-            if (this.model.MeshCount() === 0) {
-                this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
-                this.primitivesManager.CreatePrimitive('cube');
-                this.viewer.SetModel(this.model);
-                this.focusOnModel();
-            }
+        // Add a default cube on page load if scene is empty to prevent black screen
+        if (this.model.MeshCount() === 0) {
+            this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
+            this.primitivesManager.CreatePrimitive('cube');
+            this.viewer.SetModel(this.model);
+            this.focusOnModel();
+        }
         }
 
         this.initDebugOverlay();
