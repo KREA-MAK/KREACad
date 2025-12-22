@@ -99,6 +99,9 @@ export class SidebarDetailsPanel extends SidebarPanel
         if (!isFinite(volumeInDm3)) {
             return null;
         }
+        if (!this.selectedMaterial || typeof this.selectedMaterial.density !== 'number') {
+            return null;
+        }
         const densityKgPerDm3 = this.selectedMaterial.density;
         return volumeInDm3 * densityKgPerDm3;
     }
