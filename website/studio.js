@@ -99,10 +99,23 @@ class PrimitiveStudio {
     }
 
     initGround () {
-        // Ground plane disabled due to Triangle.SetMaterial() API compatibility issues
-        // The Mesh.GetTriangle().SetMaterial() pattern is not working in the bundled environment
-        // Objects will render without a ground reference plane, appearing to float in the scene
-        // This is acceptable as the main viewer and primitives functionality remain fully operational
+        // Ground plane disabled due to Triangle.SetMaterial() API compatibility issues.
+        // In the bundled o3dv runtime, the Mesh.GetTriangle().SetMaterial() call chain used by
+        // the original implementation is not compatible (no-op or error), so enabling it would
+        // risk breaking model rendering.
+        //
+        // TODO(ground-plane): Reintroduce a ground plane without relying on Triangle.SetMaterial().
+        // Planned approach:
+        //   - Create a dedicated "ground" mesh that uses a single shared material assigned at
+        //     mesh/model level only (no per-triangle SetMaterial calls).
+        //   - Use a simple untextured quad at y = 0 (or slightly below the model origin) so
+        //     objects have a visible reference plane instead of appearing to float.
+        //   - Optionally, apply a basic grid/checkerboard texture if/when material assignment at
+        //     mesh level is verified to be safe in this bundled environment.
+        //
+        // Until this plan is implemented, the viewer intentionally renders without a ground
+        // reference plane to avoid runtime issues. This is a visual-only degradation; all
+        // primitives and modeling operations remain fully functional.
     }
 
     initUI () {
