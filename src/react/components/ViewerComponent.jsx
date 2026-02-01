@@ -4,7 +4,8 @@ import { useViewer } from '../context/ViewerContext.jsx';
 const ViewerComponent = () => {
   const viewerDivRef = useRef(null);
   const canvasRef = useRef(null);
-  const { state, setViewer } = useViewer();
+  const modelLoaderRef = useRef(null);
+  const { state, setViewer, setModelLoader } = useViewer();
 
   useEffect(() => {
     if (!viewerDivRef.current) return;
@@ -30,6 +31,11 @@ const ViewerComponent = () => {
         viewer = new Engine.Viewer();
         viewer.Init(canvas);
 
+        // Setup the model loader for loading 3D files
+        const ThreeModelLoader = await import('@engine/threejs/threemodelloader.js');
+        const modelLoader = new ThreeModelLoader.ThreeModelLoader(viewer);
+        modelLoaderRef.current = modelLoader;
+
         // Setup the viewer
         if (viewer.SetExternalLibLocation) {
           viewer.SetExternalLibLocation('./libs/');
@@ -47,6 +53,7 @@ const ViewerComponent = () => {
         }, 100);
 
         setViewer(viewer);
+        setModelLoader(modelLoader);
 
         // Handle window resize
         const handleResize = () => {

@@ -5,7 +5,6 @@
 	"license": "MIT",
 	"type": "module",
 	"main": "./build/engine/o3dv.module.js",
-	"repository": "github:kovacsv/Online3DViewer",
 	"keywords": [
 		"3d",
 		"viewer",

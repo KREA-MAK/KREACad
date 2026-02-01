@@ -13,25 +13,66 @@ export const useFileUpload = () => {
 
       try {
         // Dynamic import to avoid path resolution issues
-        const Engine = await import('@engine/main.js');
+        const importerFiles = await import('@engine/import/importerfiles.js');
+        const importer = await import('@engine/import/importer.js');
+        const geometry = await import('@engine/geometry/geometry.js');
 
         // Use the viewer to load model from file list
-        if (state.viewer) {
-          // Convert FileList to InputFile objects
-          const inputFiles = [];
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            inputFiles.push(
-              new Engine.InputFile(file.name, file)
-            );
-          }
+        if (state.viewer && state.modelLoader) {
+          // Convert FileList to InputFile objects using the engine helper
+          const inputFiles = importerFiles.InputFilesFromFileObjects(files);
+          
+          // Create import settings
+          const importSettings = new importer.ImportSettings();
 
-          // Call the correct viewer method (LoadModelFromInputFiles)
-          state.viewer.LoadModelFromInputFiles(inputFiles);
+          // Load model with callbacks
+          state.modelLoader.LoadModel(inputFiles, importSettings, {
+            onLoadStart: () => {
+              console.log('Loading model started...');
+            },
+            onFileListProgress: (current, total) => {
+              console.log(`Loading files: ${current}/${total}`);
+            },
+            onFileLoadProgress: (current, total) => {
+              console.log(`File progress: ${current}/${total}`);
+            },
+            onImportStart: () => {
+              console.log('Importing model...');
+            },
+            onVisualizationStart: () => {
+              console.log('Visualizing model...');
+            },
+            onModelFinished: (importResult, threeObject) => {
+              console.log('Model loaded successfully');
+              state.viewer.SetMainObject(threeObject);
+              
+              // Get bounding sphere and fit to view
+              const boundingSphere = state.viewer.GetBoundingSphere(() => true);
+              state.viewer.AdjustClippingPlanesToSphere(boundingSphere);
+              state.viewer.SetUpVector(geometry.Direction.Y, false);
+              state.viewer.FitSphereToWindow(boundingSphere, false);
+              
+              setModel({
+                name: files[0].name,
+                meshCount: importResult.model ? importResult.model.GetMeshCount() : 0,
+              });
+            },
+            onTextureLoaded: () => {
+              state.viewer.Render();
+            },
+            onLoadError: (importError) => {
+              console.error('Model load error:', importError);
+              let message = 'Failed to load model';
+              if (importError.message) {
+                message += ': ' + importError.message;
+              }
+              setError(message);
+            }
+          });
 
           setModel({
             name: files[0].name,
-            meshCount: 0, // Will be updated when model loads
+            meshCount: 0,
           });
         }
       } catch (error) {

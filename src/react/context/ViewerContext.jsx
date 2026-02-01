@@ -5,6 +5,7 @@ export const ViewerContext = createContext();
 export const ViewerProvider = ({ children }) => {
   const initialState = {
     viewer: null,
+    modelLoader: null,
     model: null,
     loading: false,
     error: null,
@@ -34,6 +35,8 @@ export const ViewerProvider = ({ children }) => {
     switch (action.type) {
       case 'SET_VIEWER':
         return { ...state, viewer: action.payload };
+      case 'SET_MODEL_LOADER':
+        return { ...state, modelLoader: action.payload };
       case 'SET_MODEL':
         return { ...state, model: action.payload };
       case 'SET_LOADING':
@@ -88,6 +91,10 @@ export const ViewerProvider = ({ children }) => {
     dispatch({ type: 'SET_VIEWER', payload: viewer });
   }, []);
 
+  const setModelLoader = useCallback((modelLoader) => {
+    dispatch({ type: 'SET_MODEL_LOADER', payload: modelLoader });
+  }, []);
+
   const setModel = useCallback((model) => {
     dispatch({ type: 'SET_MODEL', payload: model });
   }, []);
@@ -124,6 +131,7 @@ export const ViewerProvider = ({ children }) => {
     state,
     dispatch,
     setViewer,
+    setModelLoader,
     setModel,
     setLoading,
     setError,
