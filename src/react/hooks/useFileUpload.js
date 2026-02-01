@@ -15,34 +15,23 @@ export const useFileUpload = () => {
         // Dynamic import to avoid path resolution issues
         const Engine = await import('@engine/main.js');
 
-        const inputFiles = [];
-
-        // Convert FileList to array of InputFile objects
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          inputFiles.push(
-            new Engine.InputFile(file.name, file)
-          );
-        }
-
-        // Use the viewer to import files
+        // Use the viewer to load model from file list
         if (state.viewer) {
-          const importSettings = new Engine.ImportSettings();
-
-          await Engine.Import3DViewerFiles(
-            state.viewer,
-            inputFiles,
-            importSettings
-          );
-
-          // Fit the view
-          if (state.viewer.FitToWindow) {
-            state.viewer.FitToWindow();
+          // Convert FileList to InputFile objects
+          const inputFiles = [];
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            inputFiles.push(
+              new Engine.InputFile(file.name, file)
+            );
           }
+
+          // Call the correct viewer method (LoadModelFromInputFiles)
+          state.viewer.LoadModelFromInputFiles(inputFiles);
 
           setModel({
             name: files[0].name,
-            meshCount: state.viewer.GetModel()?.GetMeshCount() || 0,
+            meshCount: 0, // Will be updated when model loads
           });
         }
       } catch (error) {
