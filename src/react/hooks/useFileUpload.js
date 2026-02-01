@@ -21,7 +21,7 @@ export const useFileUpload = () => {
         if (state.viewer && state.modelLoader) {
           // Convert FileList to InputFile objects using the engine helper
           const inputFiles = importerFiles.InputFilesFromFileObjects(files);
-          
+
           // Create import settings
           const importSettings = new importer.ImportSettings();
 
@@ -45,13 +45,13 @@ export const useFileUpload = () => {
             onModelFinished: (importResult, threeObject) => {
               console.log('Model loaded successfully');
               state.viewer.SetMainObject(threeObject);
-              
+
               // Get bounding sphere and fit to view
               const boundingSphere = state.viewer.GetBoundingSphere(() => true);
               state.viewer.AdjustClippingPlanesToSphere(boundingSphere);
               state.viewer.SetUpVector(geometry.Direction.Y, false);
               state.viewer.FitSphereToWindow(boundingSphere, false);
-              
+
               setModel({
                 name: files[0].name,
                 meshCount: importResult.model ? importResult.model.GetMeshCount() : 0,
