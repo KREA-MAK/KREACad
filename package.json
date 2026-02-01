@@ -61,10 +61,16 @@
 		"build_dist": "npm run build_website && npm run copy_assets_to_dist",
 		"build_prod": "npm run update_version && npm run build_website && npm run copy_assets_to_dist",
 		"copy_assets_to_dist": "powershell -Command \"Copy-Item website/*.html dist/; Copy-Item website/*.xml dist/; Copy-Item website/robots.txt dist/; Copy-Item website/studio.js dist/; Copy-Item -Recurse website/assets dist/ -Force; Copy-Item -Recurse website/info dist/ -Force; Copy-Item website/.htaccess dist/; Copy-Item website/formats-guide.html dist/; Copy-Item website/seo-tracking.html dist/\"",
-		"serve_dist": "npm run build_dist && http-server dist -a 127.0.0.1 -p 8080 --no-dotfiles -d false"
+		"serve_dist": "npm run build_dist && http-server dist -a 127.0.0.1 -p 8080 --no-dotfiles -d false",
+		"react:dev": "vite",
+		"react:build": "vite build",
+		"react:preview": "vite preview",
+		"react:serve": "npm run react:build && http-server dist_react -a 127.0.0.1 -p 8080 --no-dotfiles -d false"
 	},
 	"devDependencies": {
+		"@tailwindcss/postcss": "^4.1.18",
 		"@types/node": "^22.15.0",
+		"autoprefixer": "^10.4.24",
 		"esbuild": "^0.25.4",
 		"eslint": "^8.57.0",
 		"eslint-plugin-unused-imports": "^4.1.0",
@@ -73,16 +79,24 @@
 		"jsdoc": "^4.0.4",
 		"mocha": "^11.5.0",
 		"oslllo-svg-fixer": "^3.0.0",
+		"postcss": "^8.5.6",
 		"rollup": "^4.41.0",
 		"run-python3": "^0.0.5",
 		"svgo": "^3.3.2",
+		"tailwindcss": "^4.1.18",
 		"typescript": "^5.0.4"
 	},
 	"dependencies": {
 		"@simonwep/pickr": "1.9.0",
+		"@types/react": "^19.2.10",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^5.1.2",
 		"fflate": "0.8.2",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
 		"tailwind": "^4.0.0",
-		"three": "0.176.0"
+		"three": "0.176.0",
+		"vite": "^7.3.1"
 	},
 	"eslintConfig": {
 		"env": {
