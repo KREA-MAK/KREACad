@@ -6,8 +6,9 @@
 
 ### Company Information
 - **Website**: [www.krea.tr](https://www.krea.tr)
-- **Founded**: 2025
-- **Founder & CEO**: Tansu Ozcelebi
+- **Founded**: 2004
+- **Headquarters**: Izmir, Turkey
+- **Founder & CEO**: Tansu Ozcelebi & Nihat Nalcı
 - **Copyright**: © 2025 KREA. All rights reserved.
 
 ### Mission

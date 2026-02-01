@@ -9,6 +9,20 @@ import { PrimitivesManager } from './primitivesmanager.js';
 
 import * as Engine from '../engine/main.js';
 export { Engine };
+export const {
+    Viewer,
+    NavigationMode,
+    ProjectionMode,
+    Coord3D,
+    Model,
+    Mesh,
+    Triangle,
+    RGBColor,
+    RGBAColor,
+    PhysicalMaterial,
+    PhongMaterial,
+    Camera
+} = Engine;
 
 import './css/icons.css';
 import './css/themes.css';

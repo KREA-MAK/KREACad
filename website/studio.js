@@ -1,15 +1,18 @@
 // Wait for OV to be loaded from o3dv.website.min.js
 // This file should be loaded with defer, not as a module
 
-// Get classes from global OV namespace
-const { Viewer, NavigationMode, ProjectionMode, Coord3D, Model, Mesh, Triangle, RGBColor, RGBAColor, PhysicalMaterial, PhongMaterial } = window.OV || {};
+// Get classes from global OV namespace - check both OV and OV.Engine
+const OVEngine = (window.OV && window.OV.Engine) || window.OV || {};
+const { Viewer, NavigationMode, ProjectionMode, Coord3D, Model, Mesh, Triangle, RGBColor, RGBAColor, PhysicalMaterial, PhongMaterial } = OVEngine;
 
 // Debug: Check if OV is loaded
 if (!window.OV) {
     console.error('OV global object not found! Make sure o3dv.website.min.js loads before studio.js');
 }
 if (!Viewer || !Model || !Mesh || !Triangle) {
-    console.error('Required OV classes not found:', { Viewer, Model, Mesh, Triangle });
+    console.error('Required OV classes not found:', { Viewer, Model, Mesh, Triangle, OVEngine });
+    console.log('window.OV:', window.OV);
+    console.log('window.OV.Engine:', window.OV ? window.OV.Engine : 'undefined');
 }
 
 // Simple PrimitivesManager subset for studio (inline to avoid module imports)
@@ -193,10 +196,15 @@ class PrimitiveStudio {
         this.viewer.Init(this.canvas);
         this.viewer.SetBackgroundColor(new RGBAColor(18, 20, 26, 255));
         this.viewer.SetNavigationMode(NavigationMode.FixedUpVector);
-        this.viewer.SetUpVector(0, 1, 0, false);
 
         this.model = new Model();
         this.primitivesManager = new StudioPrimitivesManager(this.viewer, this.model);
+
+        // Initialize with ground first so camera exists
+        this.initGround();
+
+        // Now set up vector after model is set
+        this.viewer.SetUpVector(0, 1, 0, false);
 
         // Enhance selection: keep original color, overlay ghost (simple re-color approach for now)
         const originalSelect = this.primitivesManager.SelectObject.bind(this.primitivesManager);
@@ -222,17 +230,7 @@ class PrimitiveStudio {
         };
 
     this.initLights();
-    this.initGround();
-    this.initUI();
-
-    // Check URL parameters to determine if primitives bar should be shown
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-
-    // After ground creation, fit camera if we have any mesh
-    this.fitScene();
-        // No longer auto-populate primitive_bar; handled by static HTML in toolbar
-
+    // Ground already initialized in constructor
         // Show the primitives bar by default
         const primitivesBar = document.getElementById('studio_primitives_bar');
         if (primitivesBar) {
@@ -245,7 +243,6 @@ class PrimitiveStudio {
             this.primitivesManager.CreatePrimitive('cube');
             this.viewer.SetModel(this.model);
             this.focusOnModel();
-        }
         }
 
         this.initDebugOverlay();
@@ -301,36 +298,59 @@ class PrimitiveStudio {
             genBtn.addEventListener('click', () => this.generateTrefoilFromUI());
         }
 
-        document.getElementById('reset_cam_btn').addEventListener('click', () => {
-            this.viewer.camera.OrbitToDefault();
-        });
-        document.getElementById('clear_btn').addEventListener('click', () => {
-            this.model = new Model();
-            this.primitivesManager.model = this.model;
-            this.viewer.SetModel(this.model);
-        });
-        document.getElementById('back_btn').addEventListener('click', () => {
-            // Prefer history navigation to preserve previous page state/header.
-            const ref = document.referrer;
-            if ((ref && ref.indexOf('index.html') !== -1) || window.history.length > 1) {
-                try {
-                    window.history.back();
-                    return;
-                } catch (e) { /* fall through */ }
-            }
-            // Fallback if no history (opened directly) -> go to index
-            window.location.href = './index.html';
-        });
+        const resetCamBtn = document.getElementById('reset_cam_btn');
+        if (resetCamBtn) {
+            resetCamBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Reset camera clicked');
+                this.viewer.camera.OrbitToDefault();
+            }, true);
+        }
+
+        const clearBtn = document.getElementById('clear_btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Clear clicked');
+                this.model = new Model();
+                this.primitivesManager.model = this.model;
+                this.viewer.SetModel(this.model);
+            }, true);
+        }
+
+        const backBtn = document.getElementById('back_btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Back clicked');
+                // Prefer history navigation to preserve previous page state/header.
+                const ref = document.referrer;
+                if ((ref && ref.indexOf('index.html') !== -1) || window.history.length > 1) {
+                    try {
+                        window.history.back();
+                        return;
+                    } catch (err) { /* fall through */ }
+                }
+                // Fallback if no history (opened directly) -> go to index
+                window.location.href = './index.html';
+            }, true);
+        }
 
         // Inline primitives bar wiring (toolbar)
         const toolbarButtons = document.querySelectorAll('#studio_primitives_bar .prim_icon_btn');
         toolbarButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Primitive button clicked:', btn.getAttribute('data-prim'));
                 const type = btn.getAttribute('data-prim');
                 this.createPrimitive(type, btn);
                 toolbarButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-            });
+            }, true);
         });
     }
 
