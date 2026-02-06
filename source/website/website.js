@@ -678,6 +678,11 @@ export class Website {
         AddButton(this.toolbar, 'cube', Loc('➕ New'), [], () => {
             this.ToggleCreateMode();
         });
+        AddButton(this.toolbar, 'open_url', Loc('GLB'), [], () => {
+            // Load sample KREA_Logo.glb
+            let url = 'assets/models/KREA_Logo.glb';
+            this.hashHandler.SetModelFilesToHash([url]);
+        });
         AddButton(this.toolbar, 'light', Loc('Camera Spot Light'), ['only_on_model'], () => {
             if (this.viewer && this.viewer.shadingModel) {
                 this.viewer.shadingModel.ToggleCameraSpotLight();
@@ -1161,31 +1166,7 @@ export class Website {
         window.location.reload();
     }
 
-    InitToolbar() {
-        // Add "New Project" button
-        this.toolbar.AddImageButton(
-            'assets/icons/new_project.svg',
-            Loc('New Project'),
-            () => {
-                this.ToggleCreateMode();
-            }
-        );
-        // Clear current model and show intro screen
-        this.Clear();
-        this.ShowIntroDiv();
 
-        // Clear URL hash
-        if (window.location.hash) {
-            window.history.replaceState('', document.title, window.location.pathname + window.location.search);
-        }
-
-        // Reset viewer state
-        if (this.viewer) {
-            this.viewer.Clear();
-        }
-
-        HandleEvent('navigation', 'home_key');
-    }
 
     ToggleCreateMode() {
         let iframe = document.getElementById('create_mode_iframe');
