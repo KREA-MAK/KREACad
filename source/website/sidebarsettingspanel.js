@@ -187,7 +187,7 @@ class EnvironmentMapPopup extends PopupDialog {
     this.Open();
   }
 
-  Update() {}
+  Update() { }
 }
 
 class SettingsSection {
@@ -203,11 +203,11 @@ class SettingsSection {
     this.callbacks = callbacks;
   }
 
-  Update() {}
+  Update() { }
 
-  UpdateVisibility() {}
+  UpdateVisibility() { }
 
-  Clear() {}
+  Clear() { }
 }
 
 class SettingsModelDisplaySection extends SettingsSection {
@@ -781,7 +781,9 @@ export class SidebarSettingsPanel extends SidebarPanel {
     this.settings.backgroundGradientBottomColor = defaultSettings.backgroundGradientBottomColor;
     this.settings.defaultLineColor = defaultSettings.defaultLineColor;
     this.settings.defaultColor = defaultSettings.defaultColor;
-    this.settings.edgeSettings = defaultSettings.edgeSettings;
+    if (defaultSettings.edgeSettings) {
+      this.settings.edgeSettings = { ...defaultSettings.edgeSettings };
+    }
     this.settings.themeId = defaultSettings.themeId;
     this.UpdateControlsStatus();
     this.callbacks.onEnvironmentMapChanged();

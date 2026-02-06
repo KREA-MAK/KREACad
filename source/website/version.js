@@ -1,7 +1,7 @@
 // Auto-generated version file - Do not edit manually
 export const KreaCAD_VERSION = {
-    version: '1.1.4',
-    build: 111,
-    timestamp: '2026-02-01T21:08:41.867Z',
-    fullVersion: 'v1.1.4.build.111'
+    version: '1.1.19',
+    build: 133,
+    timestamp: '2026-02-06T22:45:27.459Z',
+    fullVersion: 'v1.1.19.build.133'
 };

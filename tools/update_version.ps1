@@ -4,10 +4,11 @@
 $versionFile = "version.json"
 if (Test-Path $versionFile) {
     $versionData = Get-Content $versionFile | ConvertFrom-Json
-} else {
+}
+else {
     $versionData = @{
-        version = "1.0.0"
-        build = 1
+        version   = "1.0.0"
+        build     = 1
         timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ")
     }
 }
@@ -15,6 +16,21 @@ if (Test-Path $versionFile) {
 # Increment build number
 $versionData.build = [int]$versionData.build + 1
 $versionData.timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ")
+
+# Increment patch version (Major.Minor.Patch)
+$verParts = $versionData.version.Split('.')
+if ($verParts.Count -eq 3) {
+    $verParts[2] = [int]$verParts[2] + 1
+    $versionData.version = $verParts -join '.'
+}
+
+# Update package.json version
+$packageJsonFile = "package.json"
+if (Test-Path $packageJsonFile) {
+    $pkgData = Get-Content $packageJsonFile -Raw | ConvertFrom-Json
+    $pkgData.version = $versionData.version
+    $pkgData | ConvertTo-Json -Depth 10 | Set-Content $packageJsonFile
+}
 
 # Write back to version.json
 $versionData | ConvertTo-Json | Set-Content $versionFile

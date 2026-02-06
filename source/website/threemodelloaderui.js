@@ -6,117 +6,109 @@ import { AddSvgIconElement } from './utils.js';
 import { ImportErrorCode } from '../engine/import/importer.js';
 import { Loc } from '../engine/core/localization.js';
 
-export class ThreeModelLoaderUI
-{
-    constructor ()
-    {
+export class ThreeModelLoaderUI {
+    constructor() {
         // this.modelLoader = new ThreeModelLoader (); // Removed THREE.js dependency
         this.modelLoader = null; // Placeholder
         this.modalDialog = null;
     }
 
-    LoadModel (inputFiles, settings, callbacks)
-    {
+    LoadModel(inputFiles, settings, callbacks) {
         // Removed THREE.js model loading functionality
         console.log('LoadModel called - THREE.js functionality removed');
-        callbacks.onLoadError({ code: ImportErrorCode.ImportFailed, message: 'Model loading disabled - THREE.js dependency removed' });
+        callbacks.onError({ code: ImportErrorCode.ImportFailed, message: 'Model loading disabled - THREE.js dependency removed' });
     }
 
-    GetModelLoader ()
-    {
+    GetModelLoader() {
         // return this.modelLoader; // Removed THREE.js dependency
         return null; // Placeholder
     }
 
-    GetImporter ()
-    {
+    GetImporter() {
         // return this.modelLoader.GetImporter (); // Removed THREE.js dependency
         return null; // Placeholder
     }
 
-    ShowErrorDialog (importError)
-    {
+    ShowErrorDialog(importError) {
         if (importError.code === ImportErrorCode.NoImportableFile) {
-            return ShowMessageDialog (
-                Loc ('Something went wrong'),
-                Loc ('No importable file found.'),
+            return ShowMessageDialog(
+                Loc('Something went wrong'),
+                Loc('No importable file found.'),
                 null
             );
         } else if (importError.code === ImportErrorCode.FailedToLoadFile) {
             let details = [];
             if (importError.mainFile) {
-                details.push (Loc ('Main file:') + ' ' + importError.mainFile);
+                details.push(Loc('Main file:') + ' ' + importError.mainFile);
             }
             if (importError.message) {
-                details.push (importError.message);
+                details.push(importError.message);
             }
-            details.push (Loc ('The remote server might have refused the request (CORS, 404, or network error).') + ' ' + Loc ('Check that:'));
-            details.push ('- ' + Loc ('The URL is correct and accessible directly in a browser.'));
-            details.push ('- ' + Loc ('The server sends Access-Control-Allow-Origin header ("*") or your domain.'));
-            details.push ('- ' + Loc ('No corporate/VPN/firewall blocks the request.'));
-            const detailText = details.join ('\n');
-            return ShowMessageDialog (
-                Loc ('Something went wrong'),
-                Loc ('Failed to load file for import.'),
+            details.push(Loc('The remote server might have refused the request (CORS, 404, or network error).') + ' ' + Loc('Check that:'));
+            details.push('- ' + Loc('The URL is correct and accessible directly in a browser.'));
+            details.push('- ' + Loc('The server sends Access-Control-Allow-Origin header ("*") or your domain.'));
+            details.push('- ' + Loc('No corporate/VPN/firewall blocks the request.'));
+            const detailText = details.join('\n');
+            return ShowMessageDialog(
+                Loc('Something went wrong'),
+                Loc('Failed to load file for import.'),
                 detailText
             );
         } else if (importError.code === ImportErrorCode.ImportFailed) {
-            return ShowMessageDialog (
-                Loc ('Something went wrong'),
-                Loc ('Failed to import model.'),
+            return ShowMessageDialog(
+                Loc('Something went wrong'),
+                Loc('Failed to import model.'),
                 importError.message
             );
         } else {
-            return ShowMessageDialog (
-                Loc ('Something went wrong'),
-                Loc ('Unknown error.'),
+            return ShowMessageDialog(
+                Loc('Something went wrong'),
+                Loc('Unknown error.'),
                 null
             );
         }
     }
 
-    ShowFileSelectorDialog (fileNames, onSelect)
-    {
-        let dialog = new ButtonDialog ();
-        let contentDiv = dialog.Init (Loc ('Select Model'), [
+    ShowFileSelectorDialog(fileNames, onSelect) {
+        let dialog = new ButtonDialog();
+        let contentDiv = dialog.Init(Loc('Select Model'), [
             {
-                name : Loc ('Cancel'),
-                subClass : 'outline',
-                onClick () {
-                    dialog.Close ();
+                name: Loc('Cancel'),
+                subClass: 'outline',
+                onClick() {
+                    dialog.Close();
                 }
             }
         ]);
-        dialog.SetCloseHandler (() => {
-            onSelect (null);
+        dialog.SetCloseHandler(() => {
+            onSelect(null);
         });
 
-        let text = Loc ('Multiple importable models found. Select the model you would like to import from the list below.');
-        AddDiv (contentDiv, 'ov_dialog_message', text);
+        let text = Loc('Multiple importable models found. Select the model you would like to import from the list below.');
+        AddDiv(contentDiv, 'ov_dialog_message', text);
 
-        let fileListSection = AddDiv (contentDiv, 'ov_dialog_section');
-        let fileList = AddDiv (fileListSection, 'ov_dialog_import_file_list ov_thin_scrollbar');
+        let fileListSection = AddDiv(contentDiv, 'ov_dialog_section');
+        let fileList = AddDiv(fileListSection, 'ov_dialog_import_file_list ov_thin_scrollbar');
 
         for (let i = 0; i < fileNames.length; i++) {
             let fileName = fileNames[i];
-            let fileLink = AddDiv (fileList, 'ov_dialog_file_link');
-            AddSvgIconElement (fileLink, 'meshes', 'ov_file_link_img');
-            AddDiv (fileLink, 'ov_dialog_file_link_text', fileName);
-            fileLink.addEventListener ('click', () => {
-                dialog.SetCloseHandler (null);
-                dialog.Close ();
-                onSelect (i);
+            let fileLink = AddDiv(fileList, 'ov_dialog_file_link');
+            AddSvgIconElement(fileLink, 'meshes', 'ov_file_link_img');
+            AddDiv(fileLink, 'ov_dialog_file_link_text', fileName);
+            fileLink.addEventListener('click', () => {
+                dialog.SetCloseHandler(null);
+                dialog.Close();
+                onSelect(i);
             });
         }
 
-        dialog.Open ();
+        dialog.Open();
         return dialog;
     }
 
-    CloseDialogIfOpen ()
-    {
+    CloseDialogIfOpen() {
         if (this.modalDialog !== null) {
-            this.modalDialog.Close ();
+            this.modalDialog.Close();
             this.modalDialog = null;
         }
     }

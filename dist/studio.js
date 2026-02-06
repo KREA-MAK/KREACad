@@ -1,15 +1,18 @@
 // Wait for OV to be loaded from o3dv.website.min.js
 // This file should be loaded with defer, not as a module
 
-// Get classes from global OV namespace
-const { Viewer, NavigationMode, ProjectionMode, Coord3D, Model, Mesh, Triangle, RGBColor, RGBAColor, PhysicalMaterial, PhongMaterial } = window.OV || {};
+// Get classes from global OV namespace - check both OV and OV.Engine
+const OVEngine = (window.OV && window.OV.Engine) || window.OV || {};
+const { Viewer, NavigationMode, ProjectionMode, Coord3D, Model, Mesh, Triangle, RGBColor, RGBAColor, PhysicalMaterial, PhongMaterial } = OVEngine;
 
 // Debug: Check if OV is loaded
 if (!window.OV) {
     console.error('OV global object not found! Make sure o3dv.website.min.js loads before studio.js');
 }
 if (!Viewer || !Model || !Mesh || !Triangle) {
-    console.error('Required OV classes not found:', { Viewer, Model, Mesh, Triangle });
+    console.error('Required OV classes not found:', { Viewer, Model, Mesh, Triangle, OVEngine });
+    console.log('window.OV:', window.OV);
+    console.log('window.OV.Engine:', window.OV ? window.OV.Engine : 'undefined');
 }
 
 // Simple PrimitivesManager subset for studio (inline to avoid module imports)
@@ -60,16 +63,16 @@ class StudioPrimitivesManager {
         const s = 1.0;
         const v = [
             mesh.AddVertex(new Coord3D(-s, -s, -s)),
-            mesh.AddVertex(new Coord3D( s, -s, -s)),
-            mesh.AddVertex(new Coord3D( s,  s, -s)),
-            mesh.AddVertex(new Coord3D(-s,  s, -s)),
-            mesh.AddVertex(new Coord3D(-s, -s,  s)),
-            mesh.AddVertex(new Coord3D( s, -s,  s)),
-            mesh.AddVertex(new Coord3D( s,  s,  s)),
-            mesh.AddVertex(new Coord3D(-s,  s,  s))
+            mesh.AddVertex(new Coord3D(s, -s, -s)),
+            mesh.AddVertex(new Coord3D(s, s, -s)),
+            mesh.AddVertex(new Coord3D(-s, s, -s)),
+            mesh.AddVertex(new Coord3D(-s, -s, s)),
+            mesh.AddVertex(new Coord3D(s, -s, s)),
+            mesh.AddVertex(new Coord3D(s, s, s)),
+            mesh.AddVertex(new Coord3D(-s, s, s))
         ];
         const faces = [
-            [0,1,2,3], [4,7,6,5], [0,4,5,1], [1,5,6,2], [2,6,7,3], [3,7,4,0]
+            [0, 1, 2, 3], [4, 7, 6, 5], [0, 4, 5, 1], [1, 5, 6, 2], [2, 6, 7, 3], [3, 7, 4, 0]
         ];
         faces.forEach(f => {
             mesh.AddTriangle(new Triangle(f[0], f[1], f[2]));
@@ -156,19 +159,19 @@ class StudioPrimitivesManager {
     generatePlane(mesh) {
         const s = 2.0;
         const v0 = mesh.AddVertex(new Coord3D(-s, 0, -s));
-        const v1 = mesh.AddVertex(new Coord3D( s, 0, -s));
-        const v2 = mesh.AddVertex(new Coord3D( s, 0,  s));
-        const v3 = mesh.AddVertex(new Coord3D(-s, 0,  s));
+        const v1 = mesh.AddVertex(new Coord3D(s, 0, -s));
+        const v2 = mesh.AddVertex(new Coord3D(s, 0, s));
+        const v3 = mesh.AddVertex(new Coord3D(-s, 0, s));
         mesh.AddTriangle(new Triangle(v0, v1, v2));
         mesh.AddTriangle(new Triangle(v0, v2, v3));
     }
 
-    SelectObject() {}
-    DeselectObject() {}
+    SelectObject() { }
+    DeselectObject() { }
 }
 
 // Simple helper to create a checker grid texture via canvas
-function createGrid (canvas) {
+function createGrid(canvas) {
     const ctx = canvas.getContext('2d');
     const w = canvas.width = window.innerWidth;
     const h = canvas.height = window.innerHeight;
@@ -184,7 +187,7 @@ function createGrid (canvas) {
 }
 
 class PrimitiveStudio {
-    constructor () {
+    constructor() {
         this.canvas = document.getElementById('viewer_canvas');
         this.gridCanvas = document.getElementById('grid_canvas');
         createGrid(this.gridCanvas);
@@ -193,10 +196,15 @@ class PrimitiveStudio {
         this.viewer.Init(this.canvas);
         this.viewer.SetBackgroundColor(new RGBAColor(18, 20, 26, 255));
         this.viewer.SetNavigationMode(NavigationMode.FixedUpVector);
-        this.viewer.SetUpVector(0, 1, 0, false);
 
         this.model = new Model();
         this.primitivesManager = new StudioPrimitivesManager(this.viewer, this.model);
+
+        // Initialize with ground first so camera exists
+        this.initGround();
+
+        // Now set up vector after model is set
+        this.viewer.SetUpVector(0, 1, 0, false);
 
         // Enhance selection: keep original color, overlay ghost (simple re-color approach for now)
         const originalSelect = this.primitivesManager.SelectObject.bind(this.primitivesManager);
@@ -221,54 +229,41 @@ class PrimitiveStudio {
             return mat;
         };
 
-    this.initLights();
-    this.initGround();
-    this.initUI();
-
-    // Check URL parameters to determine if primitives bar should be shown
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-
-    // After ground creation, fit camera if we have any mesh
-    this.fitScene();
-        // No longer auto-populate primitive_bar; handled by static HTML in toolbar
-
+        this.initLights();
+        // Ground already initialized in constructor
         // Show the primitives bar by default
         const primitivesBar = document.getElementById('studio_primitives_bar');
         if (primitivesBar) {
             primitivesBar.style.display = 'flex';
         }
 
-        // Only add default cube and show primitives if in 'new' mode
-        if (mode === 'new') {
-            // Add a default cube so the scene isn't empty/dark
-            if (this.model.MeshCount() === 0) {
-                this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
-                this.primitivesManager.CreatePrimitive('cube');
-                this.viewer.SetModel(this.model);
-                this.focusOnModel();
-            }
+        // Add a default cube on page load if scene is empty to prevent black screen
+        if (this.model.MeshCount() === 0) {
+            this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
+            this.primitivesManager.CreatePrimitive('cube');
+            this.viewer.SetModel(this.model);
+            this.focusOnModel();
         }
 
         this.initDebugOverlay();
         this.bindResize();
     }
 
-    initLights () {
+    initLights() {
         // Since engine doesn't yet support dynamic light sources here, emulate brightness
         // by slightly brighter background and relying on material roughness/metalness sliders.
         this.viewer.SetBackgroundColor(new RGBColor(28, 30, 36));
     }
 
-    initGround () {
+    initGround() {
         const mesh = new Mesh();
         const size = 40;
         mesh.AddVertex(new Coord3D(-size, -2, -size));
         mesh.AddVertex(new Coord3D(size, -2, -size));
         mesh.AddVertex(new Coord3D(size, -2, size));
         mesh.AddVertex(new Coord3D(-size, -2, size));
-        mesh.AddTriangle(0, 1, 2);
-        mesh.AddTriangle(0, 2, 3);
+        mesh.AddTriangle(new Triangle(0, 1, 2));
+        mesh.AddTriangle(new Triangle(0, 2, 3));
         const mat = new PhysicalMaterial();
         // Slight gradient imitation by random subtle variation later if needed
         mat.color = new RGBColor(110, 115, 125); // a bit lighter for visibility
@@ -282,7 +277,7 @@ class PrimitiveStudio {
         this.viewer.SetModel(this.model);
     }
 
-    initUI () {
+    initUI() {
         // No longer populate primitive_bar in param_panel; handled by static HTML in toolbar
 
         document.getElementById('metalness_slider').addEventListener('input', (e) => {
@@ -303,48 +298,69 @@ class PrimitiveStudio {
             genBtn.addEventListener('click', () => this.generateTrefoilFromUI());
         }
 
-        document.getElementById('reset_cam_btn').addEventListener('click', () => {
-            this.viewer.camera.OrbitToDefault();
-        });
-        document.getElementById('clear_btn').addEventListener('click', () => {
-            this.model = new Model();
-            this.primitivesManager.model = this.model;
-            this.viewer.SetModel(this.model);
-        });
-        document.getElementById('back_btn').addEventListener('click', () => {
-            // Prefer history navigation to preserve previous page state/header.
-            const ref = document.referrer;
-            if ((ref && ref.indexOf('index.html') !== -1) || window.history.length > 1) {
-                try {
-                    window.history.back();
-                    return;
-                } catch (e) { /* fall through */ }
-            }
-            // Fallback if no history (opened directly) -> go to index
-            window.location.href = './index.html';
-        });
+        const resetCamBtn = document.getElementById('reset_cam_btn');
+        if (resetCamBtn) {
+            resetCamBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Reset camera clicked');
+                this.viewer.camera.OrbitToDefault();
+            }, true);
+        }
+
+        const clearBtn = document.getElementById('clear_btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Clear clicked');
+                this.model = new Model();
+                this.primitivesManager.model = this.model;
+                this.viewer.SetModel(this.model);
+            }, true);
+        }
+
+        const backBtn = document.getElementById('back_btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Back clicked');
+                // Prefer history navigation to preserve previous page state/header.
+                // User requested explicit navigation to index
+                if (window.parent !== window) {
+                    // We are in an iframe
+                    window.parent.postMessage({ action: 'close_create_mode' }, '*');
+                } else {
+                    window.location.href = './index.html';
+                }
+            }, true);
+        }
 
         // Inline primitives bar wiring (toolbar)
         const toolbarButtons = document.querySelectorAll('#studio_primitives_bar .prim_icon_btn');
         toolbarButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Primitive button clicked:', btn.getAttribute('data-prim'));
                 const type = btn.getAttribute('data-prim');
                 this.createPrimitive(type, btn);
                 toolbarButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-            });
+            }, true);
         });
     }
 
-    createPrimitive (type, btn) {
+    createPrimitive(type, btn) {
         this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
         this.primitivesManager.CreatePrimitive(type);
-    document.querySelectorAll('#studio_primitives_bar .prim_icon_btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+        document.querySelectorAll('#studio_primitives_bar .prim_icon_btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
         this.focusOnModel();
     }
 
-    updateSelectedMaterial () {
+    updateSelectedMaterial() {
         const sel = this.primitivesManager.selectedObject;
         if (!sel) return;
         const mat = sel.material;
@@ -356,7 +372,7 @@ class PrimitiveStudio {
         }
     }
 
-    generateTrefoilFromUI () {
+    generateTrefoilFromUI() {
         const a = parseFloat(document.getElementById('trefoil_a').value);
         const b = parseFloat(document.getElementById('trefoil_b').value);
         const q = parseInt(document.getElementById('trefoil_q').value, 10);
@@ -367,7 +383,7 @@ class PrimitiveStudio {
     }
 
     // Parametric center curve
-    trefoilPoint (a, b, q, u) {
+    trefoilPoint(a, b, q, u) {
         return new Coord3D(
             (a + b * Math.cos(q * u)) * Math.cos(u),
             (a + b * Math.cos(q * u)) * Math.sin(u),
@@ -375,7 +391,7 @@ class PrimitiveStudio {
         );
     }
 
-    createTrefoil (a, b, q, tube, segU, segV) {
+    createTrefoil(a, b, q, tube, segU, segV) {
         const mesh = new Mesh();
         const points = [];
         for (let i = 0; i <= segU; i++) {
@@ -433,8 +449,8 @@ class PrimitiveStudio {
                 const a1 = (i + 1) * ringSize + j;
                 const a2 = (i + 1) * ringSize + (j + 1);
                 const a3 = i * ringSize + (j + 1);
-                mesh.AddTriangle(a0, a1, a2);
-                mesh.AddTriangle(a0, a2, a3);
+                mesh.AddTriangle(new Triangle(a0, a1, a2));
+                mesh.AddTriangle(new Triangle(a0, a2, a3));
             }
         }
 
@@ -454,7 +470,7 @@ class PrimitiveStudio {
         this.focusOnModel();
     }
 
-    bindResize () {
+    bindResize() {
         window.addEventListener('resize', () => {
             createGrid(this.gridCanvas);
             this.viewer.Resize(window.innerWidth, window.innerHeight);
@@ -465,7 +481,7 @@ class PrimitiveStudio {
     // Fallback in case original initUI didn't run or DOM race
     // fallbackPopulateBar removed; no longer needed
 
-    fitScene () {
+    fitScene() {
         // Try to fit camera to model if there is at least one mesh
         if (this.model.MeshCount() > 0) {
             const sphere = this.viewer.GetBoundingSphere(() => true);
@@ -477,14 +493,14 @@ class PrimitiveStudio {
     }
 
     // More immediate camera focus after any object addition
-    focusOnModel () {
+    focusOnModel() {
         const sphere = this.viewer.GetBoundingSphere(() => true);
         if (sphere && sphere.radius > 0) {
             this.viewer.FitSphereToWindow(sphere, false);
         }
     }
 
-    initDebugOverlay () {
+    initDebugOverlay() {
         const overlay = document.createElement('div');
         overlay.id = 'studio_debug_overlay';
         overlay.style.position = 'absolute';

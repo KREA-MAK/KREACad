@@ -63,16 +63,16 @@ class StudioPrimitivesManager {
         const s = 1.0;
         const v = [
             mesh.AddVertex(new Coord3D(-s, -s, -s)),
-            mesh.AddVertex(new Coord3D( s, -s, -s)),
-            mesh.AddVertex(new Coord3D( s,  s, -s)),
-            mesh.AddVertex(new Coord3D(-s,  s, -s)),
-            mesh.AddVertex(new Coord3D(-s, -s,  s)),
-            mesh.AddVertex(new Coord3D( s, -s,  s)),
-            mesh.AddVertex(new Coord3D( s,  s,  s)),
-            mesh.AddVertex(new Coord3D(-s,  s,  s))
+            mesh.AddVertex(new Coord3D(s, -s, -s)),
+            mesh.AddVertex(new Coord3D(s, s, -s)),
+            mesh.AddVertex(new Coord3D(-s, s, -s)),
+            mesh.AddVertex(new Coord3D(-s, -s, s)),
+            mesh.AddVertex(new Coord3D(s, -s, s)),
+            mesh.AddVertex(new Coord3D(s, s, s)),
+            mesh.AddVertex(new Coord3D(-s, s, s))
         ];
         const faces = [
-            [0,1,2,3], [4,7,6,5], [0,4,5,1], [1,5,6,2], [2,6,7,3], [3,7,4,0]
+            [0, 1, 2, 3], [4, 7, 6, 5], [0, 4, 5, 1], [1, 5, 6, 2], [2, 6, 7, 3], [3, 7, 4, 0]
         ];
         faces.forEach(f => {
             mesh.AddTriangle(new Triangle(f[0], f[1], f[2]));
@@ -159,19 +159,19 @@ class StudioPrimitivesManager {
     generatePlane(mesh) {
         const s = 2.0;
         const v0 = mesh.AddVertex(new Coord3D(-s, 0, -s));
-        const v1 = mesh.AddVertex(new Coord3D( s, 0, -s));
-        const v2 = mesh.AddVertex(new Coord3D( s, 0,  s));
-        const v3 = mesh.AddVertex(new Coord3D(-s, 0,  s));
+        const v1 = mesh.AddVertex(new Coord3D(s, 0, -s));
+        const v2 = mesh.AddVertex(new Coord3D(s, 0, s));
+        const v3 = mesh.AddVertex(new Coord3D(-s, 0, s));
         mesh.AddTriangle(new Triangle(v0, v1, v2));
         mesh.AddTriangle(new Triangle(v0, v2, v3));
     }
 
-    SelectObject() {}
-    DeselectObject() {}
+    SelectObject() { }
+    DeselectObject() { }
 }
 
 // Simple helper to create a checker grid texture via canvas
-function createGrid (canvas) {
+function createGrid(canvas) {
     const ctx = canvas.getContext('2d');
     const w = canvas.width = window.innerWidth;
     const h = canvas.height = window.innerHeight;
@@ -187,7 +187,7 @@ function createGrid (canvas) {
 }
 
 class PrimitiveStudio {
-    constructor () {
+    constructor() {
         this.canvas = document.getElementById('viewer_canvas');
         this.gridCanvas = document.getElementById('grid_canvas');
         createGrid(this.gridCanvas);
@@ -229,8 +229,8 @@ class PrimitiveStudio {
             return mat;
         };
 
-    this.initLights();
-    // Ground already initialized in constructor
+        this.initLights();
+        // Ground already initialized in constructor
         // Show the primitives bar by default
         const primitivesBar = document.getElementById('studio_primitives_bar');
         if (primitivesBar) {
@@ -249,21 +249,21 @@ class PrimitiveStudio {
         this.bindResize();
     }
 
-    initLights () {
+    initLights() {
         // Since engine doesn't yet support dynamic light sources here, emulate brightness
         // by slightly brighter background and relying on material roughness/metalness sliders.
         this.viewer.SetBackgroundColor(new RGBColor(28, 30, 36));
     }
 
-    initGround () {
+    initGround() {
         const mesh = new Mesh();
         const size = 40;
         mesh.AddVertex(new Coord3D(-size, -2, -size));
         mesh.AddVertex(new Coord3D(size, -2, -size));
         mesh.AddVertex(new Coord3D(size, -2, size));
         mesh.AddVertex(new Coord3D(-size, -2, size));
-        mesh.AddTriangle(0, 1, 2);
-        mesh.AddTriangle(0, 2, 3);
+        mesh.AddTriangle(new Triangle(0, 1, 2));
+        mesh.AddTriangle(new Triangle(0, 2, 3));
         const mat = new PhysicalMaterial();
         // Slight gradient imitation by random subtle variation later if needed
         mat.color = new RGBColor(110, 115, 125); // a bit lighter for visibility
@@ -277,7 +277,7 @@ class PrimitiveStudio {
         this.viewer.SetModel(this.model);
     }
 
-    initUI () {
+    initUI() {
         // No longer populate primitive_bar in param_panel; handled by static HTML in toolbar
 
         document.getElementById('metalness_slider').addEventListener('input', (e) => {
@@ -327,15 +327,13 @@ class PrimitiveStudio {
                 e.stopPropagation();
                 console.log('Back clicked');
                 // Prefer history navigation to preserve previous page state/header.
-                const ref = document.referrer;
-                if ((ref && ref.indexOf('index.html') !== -1) || window.history.length > 1) {
-                    try {
-                        window.history.back();
-                        return;
-                    } catch (err) { /* fall through */ }
+                // User requested explicit navigation to index
+                if (window.parent !== window) {
+                    // We are in an iframe
+                    window.parent.postMessage({ action: 'close_create_mode' }, '*');
+                } else {
+                    window.location.href = './index.html';
                 }
-                // Fallback if no history (opened directly) -> go to index
-                window.location.href = './index.html';
             }, true);
         }
 
@@ -354,15 +352,15 @@ class PrimitiveStudio {
         });
     }
 
-    createPrimitive (type, btn) {
+    createPrimitive(type, btn) {
         this.primitivesManager.GenerateMaterial = () => this.primitivesManager.CreatePhysicalMaterial();
         this.primitivesManager.CreatePrimitive(type);
-    document.querySelectorAll('#studio_primitives_bar .prim_icon_btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+        document.querySelectorAll('#studio_primitives_bar .prim_icon_btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
         this.focusOnModel();
     }
 
-    updateSelectedMaterial () {
+    updateSelectedMaterial() {
         const sel = this.primitivesManager.selectedObject;
         if (!sel) return;
         const mat = sel.material;
@@ -374,7 +372,7 @@ class PrimitiveStudio {
         }
     }
 
-    generateTrefoilFromUI () {
+    generateTrefoilFromUI() {
         const a = parseFloat(document.getElementById('trefoil_a').value);
         const b = parseFloat(document.getElementById('trefoil_b').value);
         const q = parseInt(document.getElementById('trefoil_q').value, 10);
@@ -385,7 +383,7 @@ class PrimitiveStudio {
     }
 
     // Parametric center curve
-    trefoilPoint (a, b, q, u) {
+    trefoilPoint(a, b, q, u) {
         return new Coord3D(
             (a + b * Math.cos(q * u)) * Math.cos(u),
             (a + b * Math.cos(q * u)) * Math.sin(u),
@@ -393,7 +391,7 @@ class PrimitiveStudio {
         );
     }
 
-    createTrefoil (a, b, q, tube, segU, segV) {
+    createTrefoil(a, b, q, tube, segU, segV) {
         const mesh = new Mesh();
         const points = [];
         for (let i = 0; i <= segU; i++) {
@@ -451,8 +449,8 @@ class PrimitiveStudio {
                 const a1 = (i + 1) * ringSize + j;
                 const a2 = (i + 1) * ringSize + (j + 1);
                 const a3 = i * ringSize + (j + 1);
-                mesh.AddTriangle(a0, a1, a2);
-                mesh.AddTriangle(a0, a2, a3);
+                mesh.AddTriangle(new Triangle(a0, a1, a2));
+                mesh.AddTriangle(new Triangle(a0, a2, a3));
             }
         }
 
@@ -472,7 +470,7 @@ class PrimitiveStudio {
         this.focusOnModel();
     }
 
-    bindResize () {
+    bindResize() {
         window.addEventListener('resize', () => {
             createGrid(this.gridCanvas);
             this.viewer.Resize(window.innerWidth, window.innerHeight);
@@ -483,7 +481,7 @@ class PrimitiveStudio {
     // Fallback in case original initUI didn't run or DOM race
     // fallbackPopulateBar removed; no longer needed
 
-    fitScene () {
+    fitScene() {
         // Try to fit camera to model if there is at least one mesh
         if (this.model.MeshCount() > 0) {
             const sphere = this.viewer.GetBoundingSphere(() => true);
@@ -495,14 +493,14 @@ class PrimitiveStudio {
     }
 
     // More immediate camera focus after any object addition
-    focusOnModel () {
+    focusOnModel() {
         const sphere = this.viewer.GetBoundingSphere(() => true);
         if (sphere && sphere.radius > 0) {
             this.viewer.FitSphereToWindow(sphere, false);
         }
     }
 
-    initDebugOverlay () {
+    initDebugOverlay() {
         const overlay = document.createElement('div');
         overlay.id = 'studio_debug_overlay';
         overlay.style.position = 'absolute';

@@ -10,8 +10,10 @@
     <title>KreaCAD - Advanced 3D CAD Viewer, STEP File Viewer, Weight & Measurement Tool | Support 23+ Formats</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="KreaCAD is a powerful online 3D CAD viewer supporting 23+ file formats including STEP, DXF, SVG, USDZ, IGES, STL, OBJ files. Calculate weight, volume, dimensions with advanced parametric modeling and point cloud visualization.">
-    <meta name="keywords" content="CAD viewer, STEP file viewer, DXF viewer, SVG viewer, USDZ viewer, 3D model viewer, point cloud viewer, weight calculator, volume calculator, measurement tool, IGES viewer, STL viewer, OBJ viewer, parametric modeling, 3D visualization, CAD software online, engineering tool, AutoCAD DXF, Apple AR USDZ, compressed STEP STPZ">
+    <meta name="description"
+        content="KreaCAD is a powerful online 3D CAD viewer supporting 23+ file formats including STEP, DXF, SVG, USDZ, IGES, STL, OBJ files. Calculate weight, volume, dimensions with advanced parametric modeling and point cloud visualization.">
+    <meta name="keywords"
+        content="CAD viewer, STEP file viewer, DXF viewer, SVG viewer, USDZ viewer, 3D model viewer, point cloud viewer, weight calculator, volume calculator, measurement tool, IGES viewer, STL viewer, OBJ viewer, parametric modeling, 3D visualization, CAD software online, engineering tool, AutoCAD DXF, Apple AR USDZ, compressed STEP STPZ">
     <meta name="author" content="Tansu Özçelebi">
     <meta name="robots" content="index, follow">
     <meta name="language" content="en">
@@ -33,7 +35,8 @@
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="KreaCAD - Advanced 3D CAD Viewer & Measurement Tool | 23+ Supported Formats">
-    <meta property="og:description" content="Professional online 3D CAD viewer supporting STEP, DXF, SVG, USDZ, IGES, STL files. Calculate weight, measure dimensions, visualize point clouds and 3D models instantly in your browser.">
+    <meta property="og:description"
+        content="Professional online 3D CAD viewer supporting STEP, DXF, SVG, USDZ, IGES, STL files. Calculate weight, measure dimensions, visualize point clouds and 3D models instantly in your browser.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kreacad.fabus.app/">
     <meta property="og:image" content="https://kreacad.fabus.app/assets/logos/krea_logo.png">
@@ -43,7 +46,8 @@
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="KreaCAD - Advanced 3D CAD Viewer | 23+ File Formats">
-    <meta name="twitter:description" content="Professional 3D CAD file viewer and measurement tool. View STEP, DXF, SVG, USDZ, IGES, STL files online with weight calculation and point cloud support.">
+    <meta name="twitter:description"
+        content="Professional 3D CAD file viewer and measurement tool. View STEP, DXF, SVG, USDZ, IGES, STL files online with weight calculation and point cloud support.">
     <meta name="twitter:image" content="https://kreacad.fabus.app/assets/logos/krea_logo.png">
     <meta name="twitter:creator" content="@tansuozcelebi">
 
@@ -115,18 +119,18 @@
 
     <!-- website analytics start -->
     <script type="text/javascript">
-        OV.SetWebsiteEventHandler ((eventName, eventLabel, eventParams) => {
-            console.log ({
-                eventName : eventName,
-                eventLabel : eventLabel,
-                eventParams : eventParams
+        OV.SetWebsiteEventHandler((eventName, eventLabel, eventParams) => {
+            console.log({
+                eventName: eventName,
+                eventLabel: eventLabel,
+                eventParams: eventParams
             });
         });
     </script>
     <!-- website analytics end -->
 
     <script type="text/javascript">
-        OV.StartWebsite ();
+        OV.StartWebsite();
     </script>
 
 </head>
@@ -160,7 +164,9 @@
             <div class="main_sidebar ov_panel_set_right_container" id="main_sidebar"></div>
         </div>
     </div>
-    <div class="intro ov_thin_scrollbar" id="intro">
+    <iframe id="create_mode_iframe" src=""
+        style="display:none; border:none; position:absolute; top:50px; left:0; width:100%; height:calc(100% - 50px); z-index:20;"></iframe>
+    <div class="intro ov_thin_scrollbar animate__animated animate__fadeIn" id="intro">
         <div class="intro_content" id="intro_content">
             <div class="intro_logo">
                 <img class="intro_logo" src="assets/logos/krea_logo.png" alt="KreaCAD" style="max-width: 200px;">
@@ -193,7 +199,7 @@
                     <a href="#model=assets/models/sample_points.xyz">xyz</a>
                 </div>
 
-                         </div>
+            </div>
 
         </div>
     </div>

@@ -12,7 +12,7 @@ body,html { margin:0; padding:0; height:100%; background:#0f1115; font-family: Q
 #studio_toolbar { position:absolute; top:12px; left:12px; display:flex; gap:8px; z-index:10; }
 #studio_toolbar button { background:#1d232b; border:1px solid #2e3945; color:#fff; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:600; letter-spacing:.5px; }
 #studio_toolbar button:hover { background:#2b3540; }
-#viewer_canvas { position:absolute; inset:0; width:100%; height:100%; outline:none; }
+#viewer_canvas { position:absolute; inset:0; width:100%; height:100%; outline:none; pointer-events: none; }
 #ground_overlay { position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; background:radial-gradient(circle at 50% 55%, rgba(255,255,255,0.08), rgba(0,0,0,0.85)); mix-blend-mode:screen; opacity:.6; }
 #param_panel { position:absolute; top:12px; right:12px; width:260px; background:rgba(20,24,30,0.85); backdrop-filter:blur(12px); border:1px solid #2e3945; border-radius:14px; padding:16px 18px 18px; box-shadow:0 10px 28px -6px rgba(0,0,0,.55); }
 #param_panel h2 { margin:0 0 10px; font-size:17px; font-weight:600; letter-spacing:.5px; }
