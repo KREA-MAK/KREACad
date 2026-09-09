@@ -548,6 +548,9 @@ export class Website {
 
     ClearHashIfNotOnlyUrlList() {
         let importer = this.modelLoaderUI.GetImporter();
+        if (importer === null) {
+            return;
+        }
         let isOnlyUrl = importer.GetFileList().IsOnlyUrlSource();
         if (!isOnlyUrl && this.hashHandler.HasHash()) {
             this.hashHandler.SkipNextEventHandler();
