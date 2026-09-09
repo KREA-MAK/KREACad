@@ -4,9 +4,9 @@
 # Uploads the built static site (dist/) to the web server over SSH using rsync.
 #
 # Required environment variables:
-#   SSH_HOST       Server hostname or IP           (e.g. kreacad.fabus.app)
+#   SSH_HOST       Server hostname or IP           (e.g. kreacad.krea.tr)
 #   SSH_USERNAME   SSH user                         (e.g. u1234-myaccount)
-#   DEPLOY_PATH    Absolute web root on the server  (e.g. /home/customer/www/kreacad.fabus.app/public_html)
+#   DEPLOY_PATH    Absolute web root on the server  (e.g. /home/customer/www/kreacad.krea.tr/public_html)
 #
 # Optional environment variables:
 #   SSH_PORT          SSH port (default: 22; SiteGround commonly uses 18765)

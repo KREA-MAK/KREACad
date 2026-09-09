@@ -23,7 +23,7 @@ KreaCAD is a professional and advanced 3D CAD viewer solution designed for visua
 
 ## Example
 
-https://kreacad.fabus.app
+https://kreacad.krea.tr
 
 
 ## Supported file formats

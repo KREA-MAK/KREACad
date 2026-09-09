@@ -70,16 +70,16 @@ Allow: /
 Crawl-delay: 3
 
 # Sitemap location
-Sitemap: https://kreacad.fabus.app/sitemap.xml
-Sitemap: https://kreacad.fabus.app/sitemap-en.xml
-Sitemap: https://kreacad.fabus.app/sitemap-zh.xml
-Sitemap: https://kreacad.fabus.app/sitemap-ja.xml
-Sitemap: https://kreacad.fabus.app/sitemap-de.xml
-Sitemap: https://kreacad.fabus.app/sitemap-fr.xml
-Sitemap: https://kreacad.fabus.app/sitemap-es.xml
-Sitemap: https://kreacad.fabus.app/sitemap-da.xml
-Sitemap: https://kreacad.fabus.app/sitemap-nl.xml
-Sitemap: https://kreacad.fabus.app/sitemap-it.xml
+Sitemap: https://kreacad.krea.tr/sitemap.xml
+Sitemap: https://kreacad.krea.tr/sitemap-en.xml
+Sitemap: https://kreacad.krea.tr/sitemap-zh.xml
+Sitemap: https://kreacad.krea.tr/sitemap-ja.xml
+Sitemap: https://kreacad.krea.tr/sitemap-de.xml
+Sitemap: https://kreacad.krea.tr/sitemap-fr.xml
+Sitemap: https://kreacad.krea.tr/sitemap-es.xml
+Sitemap: https://kreacad.krea.tr/sitemap-da.xml
+Sitemap: https://kreacad.krea.tr/sitemap-nl.xml
+Sitemap: https://kreacad.krea.tr/sitemap-it.xml
 
 # Cache control
 Cache-control: public, max-age=86400
