@@ -521,10 +521,15 @@ export class Website {
                 } else {
                     let extensions = [];
                     let importer = this.modelLoaderUI.GetImporter();
-                    let fileList = importer.GetFileList().GetFiles();
-                    for (let i = 0; i < fileList.length; i++) {
-                        let extension = fileList[i].extension;
-                        extensions.push(extension);
+                    // The importer can be null when loading fails before it is created
+                    // (e.g. a sample/URL model that 404s). Guard against it so the error
+                    // handler degrades to the intro screen instead of throwing.
+                    if (importer !== null) {
+                        let fileList = importer.GetFileList().GetFiles();
+                        for (let i = 0; i < fileList.length; i++) {
+                            let extension = fileList[i].extension;
+                            extensions.push(extension);
+                        }
                     }
                     extensionStr = extensions.join(',');
                 }
