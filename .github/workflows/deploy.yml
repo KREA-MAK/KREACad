@@ -1,13 +1,13 @@
 name: Deploy to SiteGround
 
-# Builds the static site and deploys dist/ to kreacad.fabus.app over SSH (rsync).
+# Builds the static site and deploys dist/ to kreacad.krea.tr over SSH (rsync).
 # Pushes to master deploy automatically; can also be run manually (workflow_dispatch).
 #
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
-#   SSH_HOST         server host (e.g. kreacad.fabus.app or the SiteGround IP)
+#   SSH_HOST         server host (e.g. kreacad.krea.tr or the SiteGround IP)
 #   SSH_USERNAME     SSH username
 #   SSH_PRIVATE_KEY  private key contents (a passphrase-less key is recommended for CI)
-#   DEPLOY_PATH      absolute web root, e.g. /home/<account>/www/kreacad.fabus.app/public_html
+#   DEPLOY_PATH      absolute web root, e.g. /home/<account>/www/kreacad.krea.tr/public_html
 # Optional secrets:
 #   SSH_PORT         SSH port (defaults to 22; SiteGround commonly uses 18765)
 #   SSH_PASSPHRASE   passphrase for SSH_PRIVATE_KEY, if the key is encrypted

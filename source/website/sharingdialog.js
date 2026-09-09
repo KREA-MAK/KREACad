@@ -44,7 +44,7 @@ export function ShowSharingDialog (fileList, settings, viewer)
             let builder = CreateUrlBuilder ();
             builder.AddModelUrls (modelFiles);
             let hashParameters = builder.GetParameterList ();
-            return 'https://kreacad.fabus.app/#' + hashParameters;
+            return 'https://kreacad.krea.tr/#' + hashParameters;
         }
 
         let section = AddDiv (parentDiv, 'ov_dialog_section');
@@ -81,7 +81,7 @@ export function ShowSharingDialog (fileList, settings, viewer)
             embeddingCode += '<iframe';
             embeddingCode += ' width="640" height="480"';
             embeddingCode += ' style="border:1px solid #eeeeee;"';
-            embeddingCode += ' src="https://kreacad.fabus.app/embed.html#' + hashParameters + '">';
+            embeddingCode += ' src="https://kreacad.krea.tr/embed.html#' + hashParameters + '">';
             embeddingCode += '</iframe>';
             return embeddingCode;
         }
