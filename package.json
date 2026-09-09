@@ -49,9 +49,10 @@
               ],
     "scripts":  {
                     "start":  "npm run build_dev \u0026\u0026 npm run copy_assets_to_dist \u0026\u0026 http-server dist -a 127.0.0.1 --no-dotfiles -d false",
+                    "dev":  "npm run build_engine_dev && esbuild source/website/index.js --bundle --minify --global-name=OV --sourcemap --loader:.ttf=file --loader:.woff=file --loader:.svg=file --outfile=dist/o3dv.website.min.js && npm run copy_assets_to_dist && http-server dist -a 127.0.0.1 -p 8080 --no-dotfiles -d false",
                     "lint":  "eslint source",
                     "lint_fix":  "eslint source --fix",
-                    "update_version":  "powershell -ExecutionPolicy Bypass -File tools/update_version.ps1",
+                    "update_version":  "node tools/update_version.cjs",
                     "build_dev":  "npm run build_engine_dev \u0026\u0026 npm run build_website_dev",
                     "build_engine_dev":  "esbuild source/engine/main.js --bundle --minify --global-name=OV --sourcemap --outfile=dist/o3dv.min.js",
                     "build_engine":  "esbuild source/engine/main.js --bundle --minify --global-name=OV --outfile=dist/o3dv.min.js",
